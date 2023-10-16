@@ -1,0 +1,543 @@
+﻿<?xml version="1.0" encoding="UTF-8"?>
+<FamilyHistory classCode="OBS" moodCode="EVN">
+  <id root="2.16.840.1.113883.6.117" extension="116" assigningAuthorityName="HRA" />
+  <code code="10157-6" codeSystemName="LOINC" displayName="HISTORY OF FAMILY MEMBER DISEASE" />
+  <text>ClinicName; InstitutionName</text>
+  <effectiveTime value="202310141655" />
+  <subject typeCode="SBJ">
+    <patient classCode="PAT">
+      <id root="2.16.840.1.113883.6.117" extension="999150" />
+      <patientPerson classCode="PSN" determinerCode="INSTANCE">
+        <id extension="1" />
+        <name>
+          <given>Jane</given>
+          <family>Test</family>
+        </name>
+        <administrativeGenderCode code="F" />
+        <birthTime value="19750505" />
+        <deceasedInd value="false" />
+        <relative classCode="PRS">
+          <code code="NMTH" />
+          <relationshipHolder classCode="PSN" determinerCode="INSTANCE">
+            <id extension="2" />
+            <name>
+              <given>Jill</given>
+              <family />
+            </name>
+            <administrativeGenderCode code="F" />
+            <deceasedInd value="false" />
+            <relative classCode="PRS">
+              <code code="NMTH" />
+              <relationshipHolder classCode="PSN" determinerCode="INSTANCE">
+                <id extension="4" />
+              </relationshipHolder>
+            </relative>
+            <relative classCode="PRS">
+              <code code="NFTH" />
+              <relationshipHolder classCode="PSN" determinerCode="INSTANCE">
+                <id extension="5" />
+              </relationshipHolder>
+            </relative>
+          </relationshipHolder>
+          <subjectOf1 typeCode="SBJ">
+            <livingEstimatedAge classCode="OBS" moodCode="EVN">
+              <code code="21611-9" displayName="ESTIMATED AGE" codeSystemName="LOINC" />
+              <value value="73" />
+            </livingEstimatedAge>
+          </subjectOf1>
+        </relative>
+        <relative classCode="PRS">
+          <code code="NFTH" />
+          <relationshipHolder classCode="PSN" determinerCode="INSTANCE">
+            <id extension="3" />
+            <name>
+              <given>John</given>
+              <family>Test</family>
+            </name>
+            <administrativeGenderCode code="M" />
+            <deceasedInd value="false" />
+            <relative classCode="PRS">
+              <code code="NMTH" />
+              <relationshipHolder classCode="PSN" determinerCode="INSTANCE">
+                <id extension="6" />
+              </relationshipHolder>
+            </relative>
+            <relative classCode="PRS">
+              <code code="NFTH" />
+              <relationshipHolder classCode="PSN" determinerCode="INSTANCE">
+                <id extension="7" />
+              </relationshipHolder>
+            </relative>
+          </relationshipHolder>
+          <subjectOf1 typeCode="SBJ">
+            <livingEstimatedAge classCode="OBS" moodCode="EVN">
+              <code code="21611-9" displayName="ESTIMATED AGE" codeSystemName="LOINC" />
+              <value value="75" />
+            </livingEstimatedAge>
+          </subjectOf1>
+        </relative>
+        <relative classCode="PRS">
+          <code code="MGRMTH" />
+          <relationshipHolder classCode="PSN" determinerCode="INSTANCE">
+            <id extension="4" />
+            <name>
+              <given>Joan</given>
+              <family />
+            </name>
+            <administrativeGenderCode code="F" />
+            <deceasedInd value="false" />
+          </relationshipHolder>
+          <subjectOf1 typeCode="SBJ">
+            <livingEstimatedAge classCode="OBS" moodCode="EVN">
+              <code code="21611-9" displayName="ESTIMATED AGE" codeSystemName="LOINC" />
+              <value value="97" />
+            </livingEstimatedAge>
+          </subjectOf1>
+        </relative>
+        <relative classCode="PRS">
+          <code code="MGRFTH" />
+          <relationshipHolder classCode="PSN" determinerCode="INSTANCE">
+            <id extension="5" />
+            <name>
+              <given>Jack</given>
+              <family />
+            </name>
+            <administrativeGenderCode code="M" />
+            <deceasedInd value="true" />
+          </relationshipHolder>
+          <subjectOf1 typeCode="SBJ">
+            <deceasedEstimatedAge classCode="OBS" moodCode="EVN">
+              <code code="39016-1" displayName="AGE AT DEATH" codeSystemName="LOINC" />
+              <value value="98" />
+            </deceasedEstimatedAge>
+          </subjectOf1>
+        </relative>
+        <relative classCode="PRS">
+          <code code="PGRMTH" />
+          <relationshipHolder classCode="PSN" determinerCode="INSTANCE">
+            <id extension="6" />
+            <name>
+              <given>Jenna</given>
+              <family />
+            </name>
+            <administrativeGenderCode code="F" />
+            <deceasedInd value="false" />
+          </relationshipHolder>
+          <subjectOf1 typeCode="SBJ">
+            <livingEstimatedAge classCode="OBS" moodCode="EVN">
+              <code code="21611-9" displayName="ESTIMATED AGE" codeSystemName="LOINC" />
+              <value value="96" />
+            </livingEstimatedAge>
+          </subjectOf1>
+        </relative>
+        <relative classCode="PRS">
+          <code code="PGRFTH" />
+          <relationshipHolder classCode="PSN" determinerCode="INSTANCE">
+            <id extension="7" />
+            <name>
+              <given>Jed</given>
+              <family />
+            </name>
+            <administrativeGenderCode code="M" />
+            <deceasedInd value="true" />
+          </relationshipHolder>
+          <subjectOf1 typeCode="SBJ">
+            <deceasedEstimatedAge classCode="OBS" moodCode="EVN">
+              <code code="39016-1" displayName="AGE AT DEATH" codeSystemName="LOINC" />
+              <value value="98" />
+            </deceasedEstimatedAge>
+          </subjectOf1>
+        </relative>
+        <relative classCode="PRS">
+          <code code="NSIS" />
+          <relationshipHolder classCode="PSN" determinerCode="INSTANCE">
+            <id extension="8" />
+            <name>
+              <given>JaneSister</given>
+              <family />
+            </name>
+            <administrativeGenderCode code="F" />
+            <deceasedInd value="false" />
+            <relative classCode="PRS">
+              <code code="NMTH" />
+              <relationshipHolder classCode="PSN" determinerCode="INSTANCE">
+                <id extension="2" />
+              </relationshipHolder>
+            </relative>
+            <relative classCode="PRS">
+              <code code="NFTH" />
+              <relationshipHolder classCode="PSN" determinerCode="INSTANCE">
+                <id extension="3" />
+              </relationshipHolder>
+            </relative>
+          </relationshipHolder>
+          <subjectOf1 typeCode="SBJ">
+            <livingEstimatedAge classCode="OBS" moodCode="EVN">
+              <code code="21611-9" displayName="ESTIMATED AGE" codeSystemName="LOINC" />
+              <value value="30" />
+            </livingEstimatedAge>
+          </subjectOf1>
+        </relative>
+        <relative classCode="PRS">
+          <code code="NBRO" />
+          <relationshipHolder classCode="PSN" determinerCode="INSTANCE">
+            <id extension="9" />
+            <name>
+              <given>JaneBroT1</given>
+              <family>Twin1</family>
+            </name>
+            <administrativeGenderCode code="M" />
+            <deceasedInd value="false" />
+            <relative classCode="PRS">
+              <code code="NMTH" />
+              <relationshipHolder classCode="PSN" determinerCode="INSTANCE">
+                <id extension="2" />
+              </relationshipHolder>
+            </relative>
+            <relative classCode="PRS">
+              <code code="NFTH" />
+              <relationshipHolder classCode="PSN" determinerCode="INSTANCE">
+                <id extension="3" />
+              </relationshipHolder>
+            </relative>
+          </relationshipHolder>
+          <subjectOf1 typeCode="SBJ">
+            <livingEstimatedAge classCode="OBS" moodCode="EVN">
+              <code code="21611-9" displayName="ESTIMATED AGE" codeSystemName="LOINC" />
+              <value value="40" />
+            </livingEstimatedAge>
+          </subjectOf1>
+        </relative>
+        <relative classCode="PRS">
+          <code code="NBRO" />
+          <relationshipHolder classCode="PSN" determinerCode="INSTANCE">
+            <id extension="10" />
+            <name>
+              <given>JaneBroT2</given>
+              <family>Twin2</family>
+            </name>
+            <administrativeGenderCode code="M" />
+            <deceasedInd value="false" />
+            <relative classCode="PRS">
+              <code code="NMTH" />
+              <relationshipHolder classCode="PSN" determinerCode="INSTANCE">
+                <id extension="2" />
+              </relationshipHolder>
+            </relative>
+            <relative classCode="PRS">
+              <code code="NFTH" />
+              <relationshipHolder classCode="PSN" determinerCode="INSTANCE">
+                <id extension="3" />
+              </relationshipHolder>
+            </relative>
+          </relationshipHolder>
+          <subjectOf1 typeCode="SBJ">
+            <livingEstimatedAge classCode="OBS" moodCode="EVN">
+              <code code="21611-9" displayName="ESTIMATED AGE" codeSystemName="LOINC" />
+              <value value="40" />
+            </livingEstimatedAge>
+          </subjectOf1>
+        </relative>
+        <relative classCode="PRS">
+          <code code="MAUNT" />
+          <relationshipHolder classCode="PSN" determinerCode="INSTANCE">
+            <id extension="11" />
+            <name>
+              <given>MatAunt</given>
+              <family />
+            </name>
+            <administrativeGenderCode code="F" />
+            <deceasedInd value="false" />
+            <relative classCode="PRS">
+              <code code="NMTH" />
+              <relationshipHolder classCode="PSN" determinerCode="INSTANCE">
+                <id extension="4" />
+              </relationshipHolder>
+            </relative>
+            <relative classCode="PRS">
+              <code code="NFTH" />
+              <relationshipHolder classCode="PSN" determinerCode="INSTANCE">
+                <id extension="5" />
+              </relationshipHolder>
+            </relative>
+          </relationshipHolder>
+        </relative>
+        <relative classCode="PRS">
+          <code code="MUNCLE" />
+          <relationshipHolder classCode="PSN" determinerCode="INSTANCE">
+            <id extension="12" />
+            <name>
+              <given>MatUncle</given>
+              <family />
+            </name>
+            <administrativeGenderCode code="M" />
+            <deceasedInd value="false" />
+            <relative classCode="PRS">
+              <code code="NMTH" />
+              <relationshipHolder classCode="PSN" determinerCode="INSTANCE">
+                <id extension="4" />
+              </relationshipHolder>
+            </relative>
+            <relative classCode="PRS">
+              <code code="NFTH" />
+              <relationshipHolder classCode="PSN" determinerCode="INSTANCE">
+                <id extension="5" />
+              </relationshipHolder>
+            </relative>
+          </relationshipHolder>
+        </relative>
+        <relative classCode="PRS">
+          <code code="PAUNT" />
+          <relationshipHolder classCode="PSN" determinerCode="INSTANCE">
+            <id extension="13" />
+            <name>
+              <given>PatUncle</given>
+              <family />
+            </name>
+            <administrativeGenderCode code="F" />
+            <deceasedInd value="false" />
+            <relative classCode="PRS">
+              <code code="NMTH" />
+              <relationshipHolder classCode="PSN" determinerCode="INSTANCE">
+                <id extension="6" />
+              </relationshipHolder>
+            </relative>
+            <relative classCode="PRS">
+              <code code="NFTH" />
+              <relationshipHolder classCode="PSN" determinerCode="INSTANCE">
+                <id extension="7" />
+              </relationshipHolder>
+            </relative>
+          </relationshipHolder>
+        </relative>
+        <relative classCode="PRS">
+          <code code="PAUNT" />
+          <relationshipHolder classCode="PSN" determinerCode="INSTANCE">
+            <id extension="14" />
+            <name>
+              <given>PatAunt</given>
+              <family />
+            </name>
+            <administrativeGenderCode code="F" />
+            <deceasedInd value="false" />
+            <relative classCode="PRS">
+              <code code="NMTH" />
+              <relationshipHolder classCode="PSN" determinerCode="INSTANCE">
+                <id extension="6" />
+              </relationshipHolder>
+            </relative>
+            <relative classCode="PRS">
+              <code code="NFTH" />
+              <relationshipHolder classCode="PSN" determinerCode="INSTANCE">
+                <id extension="7" />
+              </relationshipHolder>
+            </relative>
+          </relationshipHolder>
+        </relative>
+        <relative classCode="PRS">
+          <code code="NotAvailable" />
+          <relationshipHolder classCode="PSN" determinerCode="INSTANCE">
+            <id extension="15" />
+            <name>
+              <given>JackPrvWife</given>
+              <family />
+            </name>
+            <administrativeGenderCode code="F" />
+            <deceasedInd value="false" />
+          </relationshipHolder>
+        </relative>
+        <relative classCode="PRS">
+          <code code="NotAvailable" />
+          <relationshipHolder classCode="PSN" determinerCode="INSTANCE">
+            <id extension="16" />
+            <name>
+              <given>HalfAunt</given>
+              <family />
+            </name>
+            <administrativeGenderCode code="F" />
+            <deceasedInd value="false" />
+            <relative classCode="PRS">
+              <code code="NMTH" />
+              <relationshipHolder classCode="PSN" determinerCode="INSTANCE">
+                <id extension="15" />
+              </relationshipHolder>
+            </relative>
+            <relative classCode="PRS">
+              <code code="NFTH" />
+              <relationshipHolder classCode="PSN" determinerCode="INSTANCE">
+                <id extension="5" />
+              </relationshipHolder>
+            </relative>
+          </relationshipHolder>
+        </relative>
+        <relative classCode="PRS">
+          <code code="COUSN" />
+          <relationshipHolder classCode="PSN" determinerCode="INSTANCE">
+            <id extension="17" />
+            <administrativeGenderCode code="F" />
+            <deceasedInd value="false" />
+          </relationshipHolder>
+        </relative>
+        <relative classCode="PRS">
+          <code code="NotAvailable" />
+          <relationshipHolder classCode="PSN" determinerCode="INSTANCE">
+            <id extension="18" />
+            <name>
+              <given>Uncle</given>
+              <family />
+            </name>
+            <administrativeGenderCode code="M" />
+            <deceasedInd value="false" />
+          </relationshipHolder>
+        </relative>
+        <relative classCode="PRS">
+          <code code="MCOUSN" />
+          <relationshipHolder classCode="PSN" determinerCode="INSTANCE">
+            <id extension="19" />
+            <name>
+              <given>MatCousin</given>
+              <family />
+            </name>
+            <administrativeGenderCode code="F" />
+            <deceasedInd value="false" />
+            <relative classCode="PRS">
+              <code code="NMTH" />
+              <relationshipHolder classCode="PSN" determinerCode="INSTANCE">
+                <id extension="11" />
+              </relationshipHolder>
+            </relative>
+            <relative classCode="PRS">
+              <code code="NFTH" />
+              <relationshipHolder classCode="PSN" determinerCode="INSTANCE">
+                <id extension="18" />
+              </relationshipHolder>
+            </relative>
+          </relationshipHolder>
+        </relative>
+        <relative classCode="PRS">
+          <code code="NotAvailable" />
+          <relationshipHolder classCode="PSN" determinerCode="INSTANCE">
+            <id extension="20" />
+            <name>
+              <given>Aunt</given>
+              <family />
+            </name>
+            <administrativeGenderCode code="M" />
+            <deceasedInd value="false" />
+          </relationshipHolder>
+        </relative>
+        <relative classCode="PRS">
+          <code code="PCOUSN" />
+          <relationshipHolder classCode="PSN" determinerCode="INSTANCE">
+            <id extension="21" />
+            <name>
+              <given>PatCousin</given>
+              <family />
+            </name>
+            <administrativeGenderCode code="M" />
+            <deceasedInd value="false" />
+            <relative classCode="PRS">
+              <code code="NMTH" />
+              <relationshipHolder classCode="PSN" determinerCode="INSTANCE">
+                <id extension="13" />
+              </relationshipHolder>
+            </relative>
+            <relative classCode="PRS">
+              <code code="NFTH" />
+              <relationshipHolder classCode="PSN" determinerCode="INSTANCE">
+                <id extension="20" />
+              </relationshipHolder>
+            </relative>
+          </relationshipHolder>
+        </relative>
+        <relative classCode="PRS">
+          <code code="NotAvailable" />
+          <relationshipHolder classCode="PSN" determinerCode="INSTANCE">
+            <id extension="22" />
+            <name>
+              <given>SisInLaw</given>
+              <family />
+            </name>
+            <administrativeGenderCode code="F" />
+            <deceasedInd value="false" />
+          </relationshipHolder>
+        </relative>
+        <relative classCode="PRS">
+          <code code="NIECE" />
+          <relationshipHolder classCode="PSN" determinerCode="INSTANCE">
+            <id extension="23" />
+            <name>
+              <given>Niece</given>
+              <family />
+            </name>
+            <administrativeGenderCode code="F" />
+            <deceasedInd value="false" />
+            <relative classCode="PRS">
+              <code code="NMTH" />
+              <relationshipHolder classCode="PSN" determinerCode="INSTANCE">
+                <id extension="22" />
+              </relationshipHolder>
+            </relative>
+            <relative classCode="PRS">
+              <code code="NFTH" />
+              <relationshipHolder classCode="PSN" determinerCode="INSTANCE">
+                <id extension="9" />
+              </relationshipHolder>
+            </relative>
+          </relationshipHolder>
+        </relative>
+      </patientPerson>
+      <subjectOf1 typeCode="SBJ">
+        <livingEstimatedAge classCode="OBS" moodCode="EVN">
+          <code code="21611-9" displayName="ESTIMATED AGE" codeSystemName="LOINC" />
+          <value value="48" />
+        </livingEstimatedAge>
+      </subjectOf1>
+      <subjectOf2 typeCode="SBJ">
+        <clinicalObservation classCode="OBS" moodCode="EVN">
+          <code code="130" codeSystemName="UML" displayName="Menopausal Status" />
+          <statusCode code="3" />
+        </clinicalObservation>
+      </subjectOf2>
+      <subjectOf2 typeCode="SBJ">
+        <clinicalObservation classCode="OBS" moodCode="EVN">
+          <code code="135" codeSystemName="UML" displayName="HRT Use" />
+          <statusCode code="0" />
+        </clinicalObservation>
+      </subjectOf2>
+      <subjectOf2 typeCode="SBJ">
+        <clinicalObservation classCode="OBS" moodCode="EVN">
+          <code code="136" codeSystemName="UML" displayName="HRT Type" />
+          <statusCode code="0" />
+        </clinicalObservation>
+      </subjectOf2>
+      <subjectOf2 typeCode="SBJ">
+        <clinicalObservation classCode="OBS" moodCode="EVN">
+          <code code="137" codeSystemName="UML" displayName="HRT Length Past">
+            <qualifier>
+              <value code="-99" />
+            </qualifier>
+          </code>
+        </clinicalObservation>
+      </subjectOf2>
+      <subjectOf2 typeCode="SBJ">
+        <clinicalObservation classCode="OBS" moodCode="EVN">
+          <code code="138" codeSystemName="UML" displayName="HRT Length Intent">
+            <qualifier>
+              <value code="-99" />
+            </qualifier>
+          </code>
+        </clinicalObservation>
+      </subjectOf2>
+      <subjectOf2 typeCode="SBJ">
+        <clinicalObservation classCode="OBS" moodCode="EVN">
+          <code code="139" codeSystemName="UML" displayName="HRT Last Use">
+            <qualifier>
+              <value code="-99" />
+            </qualifier>
+          </code>
+        </clinicalObservation>
+      </subjectOf2>
+    </patient>
+  </subject>
+</FamilyHistory>
