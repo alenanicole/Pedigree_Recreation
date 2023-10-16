@@ -6,6 +6,9 @@ import time
 
 import globalVars
 import rearrange_mother
+import rearrange_father
+import rearrange_sibling
+import rearrange_child
 
 
 class Frame(ct.CTkFrame):
@@ -195,10 +198,18 @@ def reorient_file(first_name,last_name, dob, mrn, idx, tree):
 
     #if new patient is
 
+    # sibling
+    if(str(codes[idx]) == "NSIS" or str(codes[idx]) == "NBRO"):
+        rearrange_sibling.rearrange(tree, patientPerson)
     # mother
     if(str(codes[idx]) == "NMTH"):
         rearrange_mother.rearrange(tree, patientPerson)
     # father
+    if(str(codes[idx]) == "NFTH"):
+        rearrange_father.rearrange(tree, patientPerson)
+    # child
+    if(str(codes[idx]) == "DAU" or str(codes[idx]) == "SON"):
+        rearrange_child.rearrange(tree, patientPerson)
     # grandparent
 
     # TODO: Add any subjectOf1 and subjectOf2 data for new patient
@@ -234,7 +245,7 @@ def reorient_file(first_name,last_name, dob, mrn, idx, tree):
     #     subjectOf1Info.find('deceasedEstimatedAge').find('code').set('code', "39016-1")
 
 
-
+    #hi
 
     # Make file
     if(last_name != ""):
