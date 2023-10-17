@@ -16,6 +16,11 @@ class Frame(ct.CTkFrame):
         super().__init__(master, **kwargs)
         self.grid_columnconfigure(0, weight=1)
 
+class ScrollableFrame(ct.CTkScrollableFrame):
+    def __init__(self, master, **kwargs):
+        super().__init__(master, **kwargs)
+        self.grid_columnconfigure(0, weight=1)
+
 def create_app():
         app = ct.CTk()
         ct.set_appearance_mode("dark") 
@@ -69,7 +74,26 @@ def upload_file():
     file= filedialog.askopenfilename(title="Select the original patient's file", filetypes=([("XML Files","*.xml")]))
     if file:
         tree = ET.parse(file)
-        root = tree.getroot()
+        # Get patient data
+        subject = tree.find('subject')
+        patient = subject.find('.//patient')
+        patientPerson = patient.find('patientPerson')
+        name = patientPerson.find('name')
+        given = name.find('given').text
+        family = name.find('family').text
+        globalVars.originalGivenName = validateName(given)
+        globalVars.originalFamilyName = validateName(family)
+        globalVars.originalGender = patientPerson.find('administrativeGenderCode').get('code')
+        globalVars.originalDOB = patientPerson.find('birthTime').get('value')
+        globalVars.originalDeceased = patientPerson.find('deceasedInd').get('value')
+
+        for subjectOf1Data in patient.findall("subjectOf1"):
+            globalVars.subjectOf1.append(subjectOf1Data)
+        
+        for subjectOf2Data in patient.findall("subjectOf2"):
+            globalVars.subjectOf2.append(subjectOf2Data)
+
+        # Get relative data
         for relative in tree.findall('.//relative'):
             code = relative.find('code')
             codeText = code.get('code')
@@ -89,34 +113,34 @@ def upload_file():
                 relativeData = ""
                 relativeData += switchCode(codeText)
                 relativeData += validateName(given) + " " + validateName(family)
-                relatives.append(relativeData)
+                globalVars.relatives.append(relativeData)
 
-                codes.append(codeText)
-                first_names.append(validateName(given))
-                last_names.append(validateName(family))
-                ids.append(relationshipHolder.find('id').get('extenstion'))
-                genders.append(relationshipHolder.find('administrativeGenderCode').get('code'))
+                globalVars.codes.append(codeText)
+                globalVars.first_names.append(validateName(given))
+                globalVars.last_names.append(validateName(family))
+                globalVars.ids.append(relationshipHolder.find('id').get('extenstion'))
+                globalVars.genders.append(relationshipHolder.find('administrativeGenderCode').get('code'))
                 isDeceased = relationshipHolder.find('deceasedInd').get('value')
-                deceased.append(isDeceased)
+                globalVars.deceased.append(isDeceased)
             elif((numOfMoth != 0 and str(codeText) != "NMTH") and (numOfFath != 0 and str(codeText) != "NFTH")):
                 globalVars.relativesArray.append(relative)
                 relativeData = ""
                 relativeData += switchCode(codeText)
-                relatives.append(relativeData)
+                globalVars.relatives.append(relativeData)
 
-                codes.append(codeText)
-                first_names.append("")
-                last_names.append("")
-                ids.append(relationshipHolder.find('id').get('extenstion'))
-                genders.append(relationshipHolder.find('administrativeGenderCode').get('code'))
+                globalVars.codes.append(codeText)
+                globalVars.first_names.append("")
+                globalVars.last_names.append("")
+                globalVars.ids.append(relationshipHolder.find('id').get('extenstion'))
+                globalVars.genders.append(relationshipHolder.find('administrativeGenderCode').get('code'))
                 isDeceased = relationshipHolder.find('deceasedInd').get('value')
-                deceased.append(isDeceased)
+                globalVars.deceased.append(isDeceased)
 
             if(subjectOf1):
                 if(isDeceased == "false"):
-                    ages.append(subjectOf1.find('livingEstimatedAge').find('value').get('value'))
+                    globalVars.ages.append(subjectOf1.find('livingEstimatedAge').find('value').get('value'))
                 else:
-                    ages.append(subjectOf1.find('deceasedEstimatedAge').find('value').get('value'))
+                    globalVars.ages.append(subjectOf1.find('deceasedEstimatedAge').find('value').get('value'))
 
         output_family(tree)
             
@@ -125,7 +149,7 @@ def output_family(tree):
     change_to_choose_patient()
     radio_var = ct.IntVar(value=0)
     i = 0
-    for relativeData in relatives:
+    for relativeData in globalVars.relatives:
         radioButton = ct.CTkRadioButton(master=choose_patient, text=relativeData, variable=radio_var, value = i)
         radioButton.grid(row=i, column=0, padx=20, pady=(10, 0), sticky="ew")
         i += 1
@@ -139,7 +163,7 @@ def add_data(idx, tree):
     last_name = ct.StringVar()
     dob = ct.StringVar()
     mrn = ct.StringVar()
-    new_patient_label = ct.CTkLabel(master=add_patient_info, text = "New patient: " + relatives[idx])
+    new_patient_label = ct.CTkLabel(master=add_patient_info, text = "New patient: " + globalVars.relatives[idx])
     new_patient_label.grid(row=0, column=1, padx=20, pady=(10, 0), sticky="w")
     first_name_label = ct.CTkLabel(master=add_patient_info, text = "First Name")
     first_name_label.grid(row = 1, column = 0, padx=20, pady=(10, 0), sticky="w")
@@ -188,9 +212,9 @@ def reorient_file(first_name,last_name, dob, mrn, idx, tree):
     name = ET.SubElement(patientPerson, 'name')
     ET.SubElement(name, 'given').text = first_name
     ET.SubElement(name, 'family').text = last_name
-    ET.SubElement(patientPerson,'administrativeGenderCode', code=genders[idx])
+    ET.SubElement(patientPerson,'administrativeGenderCode', code=globalVars.genders[idx])
     ET.SubElement(patientPerson, 'birthTime', value=dob)
-    ET.SubElement(patientPerson, 'deceasedInd', value=deceased[idx])
+    ET.SubElement(patientPerson, 'deceasedInd', value=globalVars.deceased[idx])
 
     # Break out for rearranging
 
@@ -199,16 +223,16 @@ def reorient_file(first_name,last_name, dob, mrn, idx, tree):
     #if new patient is
 
     # sibling
-    if(str(codes[idx]) == "NSIS" or str(codes[idx]) == "NBRO"):
+    if(str(globalVars.codes[idx]) == "NSIS" or str(globalVars.codes[idx]) == "NBRO"):
         rearrange_sibling.rearrange(tree, patientPerson)
     # mother
-    if(str(codes[idx]) == "NMTH"):
+    if(str(globalVars.codes[idx]) == "NMTH"):
         rearrange_mother.rearrange(tree, patientPerson)
     # father
-    if(str(codes[idx]) == "NFTH"):
+    if(str(globalVars.codes[idx]) == "NFTH"):
         rearrange_father.rearrange(tree, patientPerson)
     # child
-    if(str(codes[idx]) == "DAU" or str(codes[idx]) == "SON"):
+    if(str(globalVars.codes[idx]) == "DAU" or str(globalVars.codes[idx]) == "SON"):
         rearrange_child.rearrange(tree, patientPerson)
     # grandparent
 
@@ -260,9 +284,10 @@ def reorient_file(first_name,last_name, dob, mrn, idx, tree):
 
 def download_file(root, filename):
     tree = ET.ElementTree(root)
+    ET.indent(tree, space="  ", level=0)
     directory=filedialog.askdirectory(initialdir="/home/", title="Select a directory to download {}".format(filename))
     if(directory):
-        tree.write(directory + "/" + filename)
+        tree.write(directory + "/" + filename, encoding="utf-8")
 
 def change_to_upload():
     upload.grid(row=0, column=0, sticky="nsew")
@@ -307,19 +332,9 @@ def change_to_download(tree, filename):
     loading.grid_forget()
 
 
-relatives = []
-# Relative data paralell arrays
-first_names = []
-last_names = []
-codes = []
-genders = []
-deceased = []
-ages = []
-ids = []
-
 app = create_app()
 upload = Frame(app)
-choose_patient = Frame(app)
+choose_patient = ScrollableFrame(app)
 add_patient_info = Frame(app)
 loading = Frame(app)
 download = Frame(app)
