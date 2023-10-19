@@ -1,4 +1,5 @@
-import xml.etree.ElementTree as ET
+# import xml.etree.ElementTree as ET
+from lxml import etree as ET
 import customtkinter as ct
 from tkinter import filedialog
 from datetime import *
@@ -59,6 +60,16 @@ def switchCode(code):
         return "Maternal Uncle -- "
     elif code == "PUNCLE":
         return "Paternal Uncle -- "
+    elif code == "NIECE":
+        return "Neice -- "
+    elif code == "NEPHEW":
+        return "Nephew --"
+    elif code == "PCOUSN":
+        return "Paternal Cousin -- "
+    elif code == "MCOUSN":
+        return "Maternal Cousin -- "
+    elif code == "COUSN":
+        return "Cousin -- "
 
     return str(code)
     
@@ -98,6 +109,7 @@ def upload_file():
             code = relative.find('code')
             codeText = code.get('code')
             if(str(codeText) == "NotAvailable"):
+                globalVars.relativesArray.append(relative)
                 continue
             if(str(codeText) != "NMTH"):
                 numOfMoth += 1
@@ -106,7 +118,7 @@ def upload_file():
             relationshipHolder = relative.find('relationshipHolder')
             subjectOf1 = relative.find('subjectOf1')
             name = relationshipHolder.find('name')
-            if(name):
+            if(name is not None):
                 globalVars.relativesArray.append(relative)
                 given = name.find('given').text
                 family = name.find('family').text
@@ -118,7 +130,15 @@ def upload_file():
                 globalVars.codes.append(codeText)
                 globalVars.first_names.append(validateName(given))
                 globalVars.last_names.append(validateName(family))
-                globalVars.ids.append(relationshipHolder.find('id').get('extenstion'))
+                currentID = str(relationshipHolder.find('id').get('extension'))
+                globalVars.ids.append(currentID)
+                if(codeText[0] == "M"):
+                    globalVars.maternalSideIDS.append(currentID)
+                elif(codeText[0] == "P"):
+                    globalVars.paternalSideIDS.append(currentID)
+                elif(codeText == "NSIS" or codeText == "NBRO"):
+                    globalVars.maternalSideIDS.append(currentID)
+                    globalVars.paternalSideIDS.append(currentID)
                 globalVars.genders.append(relationshipHolder.find('administrativeGenderCode').get('code'))
                 isDeceased = relationshipHolder.find('deceasedInd').get('value')
                 globalVars.deceased.append(isDeceased)
@@ -131,12 +151,18 @@ def upload_file():
                 globalVars.codes.append(codeText)
                 globalVars.first_names.append("")
                 globalVars.last_names.append("")
-                globalVars.ids.append(relationshipHolder.find('id').get('extenstion'))
+                currentID = str(relationshipHolder.find('id').get('extension'))
+                globalVars.ids.append(currentID)
+                if(codeText[0] == "M"):
+                    globalVars.maternalSideIDS.append(currentID)
+                elif(codeText[0] == "P"):
+                    globalVars.paternalSideIDS.append(currentID)
+                    globalVars.paternalSideIDS.append(relationshipHolder.find('id').get('extenstion'))
                 globalVars.genders.append(relationshipHolder.find('administrativeGenderCode').get('code'))
                 isDeceased = relationshipHolder.find('deceasedInd').get('value')
                 globalVars.deceased.append(isDeceased)
 
-            if(subjectOf1):
+            if(subjectOf1 is not None):
                 if(isDeceased == "false"):
                     globalVars.ages.append(subjectOf1.find('livingEstimatedAge').find('value').get('value'))
                 else:
@@ -238,38 +264,13 @@ def reorient_file(first_name,last_name, dob, mrn, idx, tree):
 
     # TODO: Add any subjectOf1 and subjectOf2 data for new patient
 
+    for data in globalVars.newPatientSubjectOf1:
+        patient.append(data)
 
-    # # Modify extension
-    # extension = tree.find(".//id").get('extension')
-    # tree.find(".//id").set('extension', (str(int(extension) + 1)))
-    # # Modify effective time
-    # tree.find(".//effectiveTime").set('value', effective_time)
-    # # Modify the MRN
-    # patient = tree.find(".//patient")
-    # patient.find(".//id").set('extension', mrn)
-    # # Modify patient info
-    # patientPerson = tree.find(".//patientPerson")
-    # name = patientPerson.find('name')
-    # given = name.find('given')
-    # given.text = first_name
-    # family = name.find('family')
-    # family.text = last_name
-
-    # patientPerson.find('administrativeGenderCode').set('code', genders[idx])
-    # patientPerson.find('birthTime').set('value', dob)
-    # patientPerson.find('deceasedInd').set('value', deceased[idx])
-
-    # subjectOf1Info = patient.find('subjectOf1')
-    # if(deceased[idx] == 'false'):
-    #     subjectOf1Info.find('livingEstimatedAge').find('value').set('value', ages[idx])
-    #     subjectOf1Info.find('livingEstimatedAge').find('code').set('code', "21611-9")
-
-    # else:
-    #     subjectOf1Info.find('deceasedEstimatedAge').find('value').set('value', ages[idx])
-    #     subjectOf1Info.find('deceasedEstimatedAge').find('code').set('code', "39016-1")
+    for data in globalVars.newPatientSubjectOf2:
+        patient.append(data)
 
 
-    #hi
 
     # Make file
     if(last_name != ""):
@@ -319,13 +320,20 @@ def change_to_loading():
     upload.grid_forget()
     download.grid_forget()
 
+def reset():
+    globalVars.reset()
+    change_to_upload()
+
 def change_to_download(tree, filename):
     download.grid(row=0, column=0, padx=20, pady=20, sticky="nsew")
     button = ct.CTkButton(master=download, text="Download File", command= lambda: download_file(tree, filename))
     button.grid(row=0, column=0, padx=20, pady=100)
+    
+    button = ct.CTkButton(master=download, text="Restart", command=reset)
+    button.grid(row=1, column=0, padx=20, pady=10)
 
     button = ct.CTkButton(master=download, text="Quit", command=quit)
-    button.grid(row=1, column=0, padx=20, pady=100)
+    button.grid(row = 2, column=0, padx=20, pady=10)
     add_patient_info.grid_forget()
     choose_patient.grid_forget()
     upload.grid_forget()
