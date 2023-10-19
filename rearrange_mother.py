@@ -120,7 +120,7 @@ def rearrange(tree, patientPerson):
             MGRFTHMotherID = 0
             MGRFTHFatherID = 0
             # Look to see if MGRFTH has any parents (original patient's great-grandparents)
-            # If they do, not the ID that they currently hold
+            # If they do, note the ID that they currently hold
             for x in relationshipHolder.findall(".//relative"):
                 if(x.find('code').get('code') == "NMTH"):
                     relationshipHolderNew = x.find('relationshipHolder')
@@ -440,13 +440,13 @@ def rearrange(tree, patientPerson):
             relationshipHolder = relative.find(".//relationshipHolder")
             id = relationshipHolder.find('id').get('extension')
 
-            # if the MGGRFTH's ID matches the original maternal grandmother father's id, she will be the new maternal grandfather
+            # if the MGGRFTH's ID matches the original maternal grandmother father's id, he will be the new maternal grandfather
             if(id == MGRMTHFatherID):
                 relative.find(".//code").set('code', "MGRFTH")
                 relationshipHolder.find('id').set('extension', "5")
                 patientPerson.insert(patientPerson.index(MGRFTHRelative),relative)
                 patientPerson.remove(MGRFTHRelative)
-            # if the MGGRFTH's ID matches the original maternal grandfather father's id, she will be the new paternal grandfather
+            # if the MGGRFTH's ID matches the original maternal grandfather father's id, he will be the new paternal grandfather
             elif(id == MGRFTHFatherID):
                 relative.find(".//code").set('code', "PGRFTH")
                 relationshipHolder.find('id').set('extension', "7")
