@@ -4,13 +4,15 @@ import customtkinter as ct
 from tkinter import filedialog
 from datetime import *
 import time
+import os
 
 import globalVars
 import rearrange_mother
 import rearrange_father
 import rearrange_sibling
 import rearrange_child
-
+import rearrange_maunt
+import rearrange_paunt
 
 class Frame(ct.CTkFrame):
     def __init__(self, master, **kwargs):
@@ -82,7 +84,7 @@ def validateName(name):
 def upload_file():
     numOfMoth = 0
     numOfFath = 0
-    file= filedialog.askopenfilename(title="Select the original patient's file", filetypes=([("XML Files","*.xml")]))
+    file= filedialog.askopenfilename(initialdir=os.getcwd(), title="Select the original patient's file", filetypes=([("XML Files","*.xml")]))
     if file:
         tree = ET.parse(file)
         # Get patient data
@@ -215,7 +217,7 @@ def add_data(idx, tree):
 def reorient_file(first_name,last_name, dob, mrn, idx, tree):
     change_to_loading()
     print(first_name, last_name, dob, mrn)
-    ext = "117"
+    ext = str(int(tree.find('.id').get("extension")) + 1)
     clinicName = tree.find(".//text").text
     today = date.today()
     effective_time = today.strftime("%Y%m%d")
@@ -261,8 +263,13 @@ def reorient_file(first_name,last_name, dob, mrn, idx, tree):
     if(str(globalVars.codes[idx]) == "DAU" or str(globalVars.codes[idx]) == "SON"):
         rearrange_child.rearrange(tree, patientPerson)
     # grandparent
+    # aunt
+    if(str(globalVars.codes[idx]) == "MAUNT"):
+        rearrange_maunt.rearrange(tree, patientPerson, globalVars.ids[idx])
+    if(str(globalVars.codes[idx]) == "PAUNT"):
+        rearrange_paunt.rearrange(tree, patientPerson)
+    # uncle
 
-    # TODO: Add any subjectOf1 and subjectOf2 data for new patient
 
     for data in globalVars.newPatientSubjectOf1:
         patient.append(data)
@@ -286,9 +293,10 @@ def reorient_file(first_name,last_name, dob, mrn, idx, tree):
 def download_file(root, filename):
     tree = ET.ElementTree(root)
     ET.indent(tree, space="  ", level=0)
-    directory=filedialog.askdirectory(initialdir="/home/", title="Select a directory to download {}".format(filename))
+    directory=filedialog.askdirectory(initialdir=os.getcwd(), title="Select a directory to download {}".format(filename))
     if(directory):
-        tree.write(directory + "/" + filename, encoding="utf-8")
+        tree.write(directory + "/" + filename, xml_declaration=True, encoding='UTF-8')
+        change_to_success()
 
 def change_to_upload():
     upload.grid(row=0, column=0, sticky="nsew")
@@ -298,6 +306,7 @@ def change_to_upload():
     add_patient_info.grid_forget()
     download.grid_forget()
     loading.grid_forget()
+    success.grid_forget()
 
 def change_to_choose_patient():
     choose_patient.grid(row=0, column=0, padx=20, pady=20, sticky="nsew")
@@ -305,6 +314,7 @@ def change_to_choose_patient():
     upload.grid_forget()
     download.grid_forget()
     loading.grid_forget()
+    success.grid_forget()
 
 def change_to_add_patient():
     add_patient_info.grid(row=0, column=0, padx=20, pady=20, sticky="nsew")
@@ -312,6 +322,7 @@ def change_to_add_patient():
     upload.grid_forget()
     download.grid_forget()
     loading.grid_forget()
+    success.grid_forget()
 
 def change_to_loading():
     loading.grid(row=0, column=0, padx=20, pady=20, sticky="nsew")
@@ -319,6 +330,21 @@ def change_to_loading():
     choose_patient.grid_forget()
     upload.grid_forget()
     download.grid_forget()
+    success.grid_forget()
+
+def change_to_success():
+    success.grid(row=0, column=0, padx=20, pady=20, sticky="nsew")
+    label = ct.CTkLabel(master=success, text = "Download Successful")
+    label.grid(row = 0, column = 0, padx=20, pady=10)
+    button = ct.CTkButton(master=success, text="Back", command=back)
+    button.grid(row=1, column=0, padx=20, pady=100)
+    loading.grid_forget()
+    add_patient_info.grid_forget()
+    choose_patient.grid_forget()
+    upload.grid_forget()
+
+def back():
+    success.grid_forget()
 
 def reset():
     globalVars.reset()
@@ -346,5 +372,6 @@ choose_patient = ScrollableFrame(app)
 add_patient_info = Frame(app)
 loading = Frame(app)
 download = Frame(app)
+success = Frame(app)
 change_to_upload()
 app.mainloop()
