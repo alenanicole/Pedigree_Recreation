@@ -289,7 +289,7 @@ def rearrange(tree, patientPerson):
             fatherID = 0
             motherFound = False
             fatherFound = False
-            relative.find(".//code").set('code', "GRNDDAU")
+            unknown = True
             relationshipHolder = relative.find(".//relationshipHolder")
             # Since "NIECE" is not defined as being maternal or paternal, we have to take
             # an extra step to determine if they should be included in the new patient's pedigree
@@ -300,21 +300,30 @@ def rearrange(tree, patientPerson):
                     # Check if mother is on the paternal side
                     if motherID in globalVars.paternalSideIDS:
                         motherFound = True
+                        unknown = False
+                    elif motherID in globalVars.maternalSideIDS:
+                        unknown = False
                 elif(x.find('code').get('code') == "NFTH"):
                     relationshipHolderNew = x.find('relationshipHolder')
                     fatherID = relationshipHolderNew.find('id').get('extension')
                     # Check if father is on the paternal side
                     if fatherID in globalVars.paternalSideIDS:
                         fatherFound = True
+                        unknown = False
+                    elif fatherID in globalVars.maternalSideIDS:
+                        unknown = False
 
             # If they have a relative on the paternal side (mother or father), they will be added to the pedigree
             # If this is the case, then we will also add the spouse's ID (if their father is related, we will add the mother) 
             # to an array that is keeping track of "Not Available" relatives that should be added to pedigree as well.
             if(motherFound or fatherFound):
+                relative.find(".//code").set('code', "GRNDDAU")
                 if(fatherFound and int(motherID) != 0):
                     globalVars.notAvailableIdsToAdd.append(motherID)
                 if(motherFound and int(fatherID) != 0):
                     globalVars.notAvailableIdsToAdd.append(fatherID)
+                patientPerson.append(relative)
+            elif(unknown):
                 patientPerson.append(relative)
 
         # Nephew -> Grandson
@@ -323,7 +332,7 @@ def rearrange(tree, patientPerson):
             fatherID = 0
             motherFound = False
             fatherFound = False
-            relative.find(".//code").set('code', "GRNDSON")
+            unknown = True
             relationshipHolder = relative.find(".//relationshipHolder")
             # Since "NEPHEW" is not defined as being maternal or paternal, we have to take
             # an extra step to determine if they should be included in the new patient's pedigree
@@ -334,21 +343,30 @@ def rearrange(tree, patientPerson):
                     # Check if mother is on the paternal side
                     if motherID in globalVars.paternalSideIDS:
                         motherFound = True
+                        unknown = False
+                    elif motherID in globalVars.maternalSideIDS:
+                        unknown = False
                 elif(x.find('code').get('code') == "NFTH"):
                     relationshipHolderNew = x.find('relationshipHolder')
                     fatherID = relationshipHolderNew.find('id').get('extension')
                     # Check if father is on the paternal side
                     if fatherID in globalVars.paternalSideIDS:
                         fatherFound = True
+                        unknown = False
+                    elif fatherID in globalVars.maternalSideIDS:
+                        unknown = False
 
             # If they have a relative on the paternal side (mother or father), they will be added to the pedigree
             # If this is the case, then we will also add the spouse's ID (if their father is related, we will add the mother) 
             # to an array that is keeping track of "Not Available" relatives that should be added to pedigree as well.
             if(motherFound or fatherFound):
+                relative.find(".//code").set('code', "GRNDSON")
                 if(fatherFound and int(motherID) != 0):
                     globalVars.notAvailableIdsToAdd.append(motherID)
                 if(motherFound and int(fatherID) != 0):
                     globalVars.notAvailableIdsToAdd.append(fatherID)
+                patientPerson.append(relative)
+            elif(unknown):
                 patientPerson.append(relative)
 
         # Paternal Cousin -> Niece or Nephew
@@ -415,6 +433,38 @@ def rearrange(tree, patientPerson):
                     globalVars.notAvailableIdsToAdd.append(fatherID)
                     if(fatherID == "1"):
                         relationshipHolderNew.find('id').set('extension', str(originalPatientID))
+            patientPerson.append(relative)
+        # Granddaughter -> Great Granddaughter
+        elif((str)(relative.find('code').get('code'))== "GRNDDAU"):
+            relative.find(".//code").set('code', "GGRNDDAU")
+            relationshipHolder = relative.find(".//relationshipHolder")
+
+            # In case one of their parents is "Not Available", we will add both to our 'notAvailableIdsToAdd' array
+            for x in relationshipHolder.findall(".//relative"):
+                if(x.find('code').get('code') == "NMTH"):
+                    relationshipHolderNew = x.find('relationshipHolder')
+                    motherID = relationshipHolderNew.find('id').get('extension')
+                    globalVars.notAvailableIdsToAdd.append(motherID)
+                elif(x.find('code').get('code') == "NFTH"):
+                    relationshipHolderNew = x.find('relationshipHolder')
+                    fatherID = relationshipHolderNew.find('id').get('extension')
+                    globalVars.notAvailableIdsToAdd.append(fatherID)
+            patientPerson.append(relative)
+        # Grandson -> Great Grandson
+        elif((str)(relative.find('code').get('code'))== "GRNDSON"):
+            relative.find(".//code").set('code', "GGRNDSON")
+            relationshipHolder = relative.find(".//relationshipHolder")
+
+            # In case one of their parents is "Not Available", we will add both to our 'notAvailableIdsToAdd' array
+            for x in relationshipHolder.findall(".//relative"):
+                if(x.find('code').get('code') == "NMTH"):
+                    relationshipHolderNew = x.find('relationshipHolder')
+                    motherID = relationshipHolderNew.find('id').get('extension')
+                    globalVars.notAvailableIdsToAdd.append(motherID)
+                elif(x.find('code').get('code') == "NFTH"):
+                    relationshipHolderNew = x.find('relationshipHolder')
+                    fatherID = relationshipHolderNew.find('id').get('extension')
+                    globalVars.notAvailableIdsToAdd.append(fatherID)
             patientPerson.append(relative)
         # Paternal Great-Grandmother -> M or P GRMTH
         elif((str)(relative.find('code').get('code'))== "PGGRMTH"):
@@ -495,10 +545,12 @@ def rearrange(tree, patientPerson):
             if(motherFound or fatherFound):
                 if(fatherFound and int(motherID) != 0):
                     globalVars.notAvailableIdsToAdd.append(motherID)
-                if(motherFound and int(fatherID    # Finally, we will add the father relative (new patient's spouse) and the original patient's relative that was created earlier
-) != 0):
+                if(motherFound and int(fatherID) != 0):
                     globalVars.notAvailableIdsToAdd.append(fatherID)
                 globalVars.notAvailableIdsToAdd.append(id)
+            
+        elif((str)(relative.find('code').get('code'))[0] != "M"):
+            patientPerson.append(relative)
 
 
     # Next, we will look at all of the relatives containing the "NotAvailable" code
