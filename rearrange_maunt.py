@@ -511,7 +511,7 @@ def rearrange(tree, patientPerson, newPatientOldID):
                         if int(motherID) == 1:
                             relationshipHolderNew.find('id').set('extension', str(originalPatientID))
                         if int(motherID) == 2:
-                            relationshipHolderNew.find('id').set('extension', "1")
+                            relationshipHolderNew.find('id').set('extension', str(motherID))
                         if int(motherID) == 4:
                             relationshipHolderNew.find('id').set('extension', "2")   
                 # Check if the "NotAvailable" relative's father is on the maternal side

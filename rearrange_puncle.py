@@ -22,7 +22,7 @@ def makeRelativeForOldPatient(originalPatient, fatherId, motherId, currentId):
     NMTHRelative = ET.SubElement(patientRelationshipHolder, 'relative', classCode = "PRS")
     ET.SubElement(NMTHRelative, 'code', code = "NMTH")
     relationshipHolderNew = ET.SubElement(NMTHRelative, 'relationshipHolder', classCode="PSN", determinerCode="INSTANCE")
-    ET.SubElement(relationshipHolderNew, 'id', extension=str(motherId))     # Update the original patient's mother id to reflect his new id
+    ET.SubElement(relationshipHolderNew, 'id', extension=str(motherId))     # Update the original patient's mother id to reflect her new id
     NFTHRelative = ET.SubElement(patientRelationshipHolder, 'relative', classCode = "PRS")
     ET.SubElement(NFTHRelative, 'code', code = "NFTH")
     relationshipHolderNew = ET.SubElement(NFTHRelative, 'relationshipHolder', classCode="PSN", determinerCode="INSTANCE")
@@ -110,7 +110,7 @@ def rearrange(tree, patientPerson, newPatientOldID):
 
             patientPerson.append(relative)
         # Paternal Grandfather -> Father
-        elif((str)(relative.find('code').get('code'))== "PGRFTH"):
+        elif((str)(relative.find('code').get('code'))== "MGRFTH"):
             relative.find(".//code").set('code', "NFTH") # Update to father code
             relationshipHolder = relative.find(".//relationshipHolder")
             relationshipHolder.find(".//id").set('extension', "3") # Update to father code
@@ -173,7 +173,7 @@ def rearrange(tree, patientPerson, newPatientOldID):
             # rather than being appending now
             mother = relative
         elif((str)(relative.find(".//code").get('code')) == "NFTH"):
-            # The original patient's father becomes the new patient's brother
+            # The original patient's father becomes the new patient's sister
             relative.find(".//code").set('code', "NBRO")
             relationshipHolder = relative.find(".//relationshipHolder")
             # Since we are essentially creating a new relative, we need a completely new ID
@@ -268,17 +268,6 @@ def rearrange(tree, patientPerson, newPatientOldID):
         # Paternal Aunt -> Sister
         elif((str)(relative.find('code').get('code'))== "PAUNT"):
             relationshipHolder = relative.find(".//relationshipHolder")
-            id = relationshipHolder.find("id").get("extension")
-            # If they are the patient, we will collect their subjectOf1 and subjectOf2 data 
-            # Then we will move on to the next patient as they do not need to be added as a relative
-            if((str)(id) == (str)(newPatientOldID)):
-                # Since the new patient is the paternal aunt, we must collect some data about her that will be
-                # added later in main.py after rearrangment
-                for subjectOf1Data in relative.findall('.//subjectOf1'):
-                    globalVars.newPatientSubjectOf1.append(subjectOf1Data)
-                for subjectOf2Data in relative.findall('.//subjectOf2'):
-                    globalVars.newPatientSubjectOf1.append(subjectOf2Data)
-                continue
 
             relative.find(".//code").set('code', "NSIS")
             # Link mother -> mother id (2)
@@ -294,8 +283,20 @@ def rearrange(tree, patientPerson, newPatientOldID):
             patientPerson.append(relative)
         # Paternal Uncle -> Brother
         elif((str)(relative.find('code').get('code'))== "PUNCLE"):
-            relative.find(".//code").set('code', "NBRO")
             relationshipHolder = relative.find(".//relationshipHolder")
+            id = relationshipHolder.find("id").get("extension")
+            # If they are the patient, we will collect their subjectOf1 and subjectOf2 data 
+            # Then we will move on to the next patient as they do not need to be added as a relative
+            if((str)(id) == (str)(newPatientOldID)):
+                # Since the new patient is the paternal uncle, we must collect some data about her that will be
+                # added later in main.py after rearrangment
+                for subjectOf1Data in relative.findall('.//subjectOf1'):
+                    globalVars.newPatientSubjectOf1.append(subjectOf1Data)
+                for subjectOf2Data in relative.findall('.//subjectOf2'):
+                    globalVars.newPatientSubjectOf1.append(subjectOf2Data)
+                continue
+
+            relative.find(".//code").set('code', "NBRO")
             # Link mother -> mother id (2)
             # Link father -> father id (3)
             for x in relationshipHolder.findall(".//relative"):
@@ -386,13 +387,13 @@ def rearrange(tree, patientPerson, newPatientOldID):
                 if(x.find('code').get('code') == "NMTH"):
                     relationshipHolderNew = x.find('relationshipHolder')
                     motherID = relationshipHolderNew.find('id').get('extension')
-                    if((str)(motherID) == (str)(newPatientOldID)):
-                        relationshipHolderNew.find('id').set('extension',"1")
-                        child = True
                     globalVars.notAvailableIdsToAdd.append(motherID)
                 elif(x.find('code').get('code') == "NFTH"):
                     relationshipHolderNew = x.find('relationshipHolder')
                     fatherID = relationshipHolderNew.find('id').get('extension')
+                    if((str)(fatherID) == (str)(newPatientOldID)):
+                        relationshipHolderNew.find('id').set('extension',"1")
+                        child = True
                     globalVars.notAvailableIdsToAdd.append(fatherID)
 
             # Determine niece/nephew or son/daughter depending on gender
@@ -458,13 +459,13 @@ def rearrange(tree, patientPerson, newPatientOldID):
             relationshipHolder = relative.find(".//relationshipHolder")
             id = relationshipHolder.find('id').get('extension')
 
-            # if the PGGRMTH's ID matches the original paternal grandmother mother's id, she will be the new maternal grandmother
+            # if the MGGRMTH's ID matches the original paternal grandmother mother's id, she will be the new maternal grandmother
             if(id == PGRMTHMotherID):
                 relative.find(".//code").set('code', "MGRMTH")
                 relationshipHolder.find('id').set('extension', "4")
                 patientPerson.insert(patientPerson.index(MGRMTHRelative),relative)
                 patientPerson.remove(MGRMTHRelative)
-            # if the PGGRMTH's ID matches the original paternal grandfather mother's id, she will be the new paternal grandmother
+            # if the MGGRMTH's ID matches the original paternal grandfather mother's id, she will be the new paternal grandmother
             elif(id == PGRFTHMotherID):
                 relative.find(".//code").set('code', "PGRMTH")
                 relationshipHolder.find('id').set('extension', "6")
@@ -475,13 +476,13 @@ def rearrange(tree, patientPerson, newPatientOldID):
             relationshipHolder = relative.find(".//relationshipHolder")
             id = relationshipHolder.find('id').get('extension')
 
-            # if the PGGRFTH's ID matches the original paternal grandmother father's id, he will be the new maternal grandfather
+            # if the MGGRFTH's ID matches the original paternal grandmother father's id, he will be the new maternal grandfather
             if(id == PGRMTHFatherID):
                 relative.find(".//code").set('code', "MGRFTH")
                 relationshipHolder.find('id').set('extension', "5")
                 patientPerson.insert(patientPerson.index(MGRFTHRelative),relative)
                 patientPerson.remove(MGRFTHRelative)
-            # if the PGGRFTH's ID matches the original paternal grandfather father's id, he will be the new paternal grandfather
+            # if the MGGRFTH's ID matches the original paternal grandfather father's id, he will be the new paternal grandfather
             elif(id == PGRFTHFatherID):
                 relative.find(".//code").set('code', "PGRFTH")
                 relationshipHolder.find('id').set('extension', "7")
