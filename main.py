@@ -1,4 +1,3 @@
-# import xml.etree.ElementTree as ET
 from lxml import etree as ET
 import customtkinter as ct
 from tkinter import filedialog
@@ -293,7 +292,7 @@ def reorient_file(first_name,last_name, dob, mrn, idx, tree):
 def download_file(root, filename):
     tree = ET.ElementTree(root)
     ET.indent(tree, space="  ", level=0)
-    directory=filedialog.askdirectory(initialdir=os.getcwd(), title="Select a directory to download {}".format(filename))
+    directory=filedialog.askdirectory(initialdir=os.getcwd(), title="Select a directory to download {} to".format(filename))
     if(directory):
         tree.write(directory + "/" + filename, xml_declaration=True, encoding='UTF-8')
         change_to_success()
