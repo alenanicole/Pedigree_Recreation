@@ -12,8 +12,10 @@ import rearrange_brother
 import rearrange_sister
 import rearrange_son
 import rearrange_daughter
-#import rearrange_maunt
-#import rearrange_paunt
+import rearrange_maunt
+import rearrange_paunt
+import rearrange_muncle
+import rearrange_puncle
 
 class Frame(ct.CTkFrame):
     def __init__(self, master, **kwargs):
@@ -271,12 +273,15 @@ def reorient_file(first_name,last_name, dob, mrn, idx, tree):
         rearrange_daughter.rearrange(tree, patientPerson)
     # grandparent
     # aunt
-    #if(str(globalVars.codes[idx]) == "MAUNT"):
-        #rearrange_maunt.rearrange(tree, patientPerson, globalVars.ids[idx])
-    #if(str(globalVars.codes[idx]) == "PAUNT"):
-        #rearrange_paunt.rearrange(tree, patientPerson)
-    # uncle
-
+    if(str(globalVars.codes[idx]) == "MAUNT"):
+        rearrange_maunt.rearrange(tree, patientPerson, globalVars.ids[idx])
+    if(str(globalVars.codes[idx]) == "PAUNT"):
+        rearrange_paunt.rearrange(tree, patientPerson)
+    # uncle    
+    if(str(globalVars.codes[idx]) == "MUNCLE"):
+        rearrange_muncle.rearrange(tree, patientPerson, globalVars.ids[idx])
+    if(str(globalVars.codes[idx]) == "PUNCLE"):
+        rearrange_puncle.rearrange(tree, patientPerson)
 
     for data in globalVars.newPatientSubjectOf1:
         patient.append(data)
