@@ -8,10 +8,12 @@ import os
 import globalVars
 import rearrange_mother
 import rearrange_father
-import rearrange_sibling
-import rearrange_child
-import rearrange_maunt
-import rearrange_paunt
+import rearrange_brother
+import rearrange_sister
+import rearrange_son
+import rearrange_daughter
+#import rearrange_maunt
+#import rearrange_paunt
 
 class Frame(ct.CTkFrame):
     def __init__(self, master, **kwargs):
@@ -249,24 +251,30 @@ def reorient_file(first_name,last_name, dob, mrn, idx, tree):
 
     #if new patient is
 
-    # sibling
-    if(str(globalVars.codes[idx]) == "NSIS" or str(globalVars.codes[idx]) == "NBRO"):
-        rearrange_sibling.rearrange(tree, patientPerson)
+    # brother
+    if(str(globalVars.codes[idx]) == "NBRO"):
+        rearrange_brother.rearrange(tree, patientPerson, globalVars.ids[idx])
+    # sister
+    if(str(globalVars.codes[idx]) == "NSIS"):
+        rearrange_sister.rearrange(tree, patientPerson, globalVars.ids[idx])
     # mother
     if(str(globalVars.codes[idx]) == "NMTH"):
         rearrange_mother.rearrange(tree, patientPerson)
     # father
     if(str(globalVars.codes[idx]) == "NFTH"):
         rearrange_father.rearrange(tree, patientPerson)
-    # child
-    if(str(globalVars.codes[idx]) == "DAU" or str(globalVars.codes[idx]) == "SON"):
-        rearrange_child.rearrange(tree, patientPerson)
+    # son
+    if(str(globalVars.codes[idx]) == "SON"):
+        rearrange_son.rearrange(tree, patientPerson)
+    # daughter
+    if(str(globalVars.codes[idx]) == "DAU"):
+        rearrange_daughter.rearrange(tree, patientPerson)
     # grandparent
     # aunt
-    if(str(globalVars.codes[idx]) == "MAUNT"):
-        rearrange_maunt.rearrange(tree, patientPerson, globalVars.ids[idx])
-    if(str(globalVars.codes[idx]) == "PAUNT"):
-        rearrange_paunt.rearrange(tree, patientPerson)
+    #if(str(globalVars.codes[idx]) == "MAUNT"):
+        #rearrange_maunt.rearrange(tree, patientPerson, globalVars.ids[idx])
+    #if(str(globalVars.codes[idx]) == "PAUNT"):
+        #rearrange_paunt.rearrange(tree, patientPerson)
     # uncle
 
 
