@@ -3,6 +3,8 @@ def reset():
     relativesArray.clear()
     global relatives
     relatives.clear()
+    global unavailableRelatives
+    unavailableRelatives = []
     # Relative data paralell arrays
     global first_names
     first_names.clear()
@@ -53,6 +55,7 @@ def reset():
 relativesArray  = []
 
 relatives = []
+unavailableRelatives = []
 # Relative data paralell arrays
 first_names = []
 last_names = []

@@ -75,8 +75,61 @@ def switchCode(code):
         return "Maternal Cousin -- "
     elif code == "COUSN":
         return "Cousin -- "
+    elif code == "NotAvailable":
+        return "Not Available -- "
+    elif code == "MGGRFTH":
+        return "Maternal Great-Grandfather -- "
+    elif code == "PGGRFTH":
+        return "Paternal Great-Grandfather -- "    
+    elif code == "MGGRMTH":
+        return "Maternal Great-Grandmother -- "
+    elif code == "PGGRMTH":
+        return "Paternal Great-Grandmother -- "
+    
 
     return str(code)
+
+def checkAvailable(code):
+    if code == "NMTH":
+        return True
+    elif code == "NFTH":
+        return True
+    elif code == "MGRMTH":
+        return True
+    elif code == "MGRFTH":
+        return True
+    elif code == "PGRMTH":
+        return True
+    elif code == "PGRFTH":
+        return True
+    elif code == "DAU":
+        return True
+    elif code == "SON":
+        return True
+    elif code == "NSIS":
+        return True
+    elif code == "NBRO":
+        return True
+    elif code == "MAUNT":
+        return True
+    elif code == "PAUNT":
+        return True
+    elif code == "MUNCLE":
+        return True
+    elif code == "PUNCLE":
+        return True
+    elif code == "NIECE":
+        return True
+    elif code == "NEPHEW":
+        return True
+    elif code == "PCOUSN":
+        return True
+    elif code == "MCOUSN":
+        return True
+    
+    return False
+
+
     
 def validateName(name):
     temp = ""
@@ -115,6 +168,10 @@ def upload_file():
             codeText = code.get('code')
             if(str(codeText) == "NotAvailable"):
                 globalVars.relativesArray.append(relative)
+                relativeData = ""
+                relativeData += switchCode(codeText)
+                relativeData += validateName(given) + " " + validateName(family)
+                globalVars.unavailableRelatives.append(relativeData)
                 continue
             if(str(codeText) != "NMTH"):
                 numOfMoth += 1
@@ -130,7 +187,11 @@ def upload_file():
                 relativeData = ""
                 relativeData += switchCode(codeText)
                 relativeData += validateName(given) + " " + validateName(family)
-                globalVars.relatives.append(relativeData)
+                
+                if(checkAvailable(codeText) == True):
+                    globalVars.relatives.append(relativeData)
+                else:
+                    globalVars.unavailableRelatives.append(relativeData)
 
                 globalVars.codes.append(codeText)
                 globalVars.first_names.append(validateName(given))
@@ -151,7 +212,10 @@ def upload_file():
                 globalVars.relativesArray.append(relative)
                 relativeData = ""
                 relativeData += switchCode(codeText)
-                globalVars.relatives.append(relativeData)
+                if(checkAvailable(codeText) == True):
+                    globalVars.relatives.append(relativeData)
+                else:
+                    globalVars.unavailableRelatives.append(relativeData)
 
                 globalVars.codes.append(codeText)
                 globalVars.first_names.append("")
@@ -187,6 +251,21 @@ def output_family(tree):
 
     button = ct.CTkButton(master=choose_patient, text="Choose Patient", command= lambda: add_data(radio_var.get(), tree))
     button.grid(row=i, column=0, padx=20, pady=20)
+    i += 1
+
+    label = ct.CTkLabel(master=choose_patient, text="Additional Relatives with Insufficient Data for Reorientation:")
+    label.grid(row=i, column=0, padx=20, pady=(10, 0), sticky="w")
+    i += 1    
+    
+    label = ct.CTkLabel(master=choose_patient, text="------------------------------------------------------------------------------------")
+    label.grid(row=i, column=0, padx=20, pady=(10, 0), sticky="w")
+    i += 1
+
+    
+    for relativeData in globalVars.unavailableRelatives:
+        label = ct.CTkLabel(master=choose_patient, text=relativeData)
+        label.grid(row=i, column=0, padx=20, pady=(10, 0), sticky="w")
+        i += 1
 
 def add_data(idx, tree):
     change_to_add_patient()
