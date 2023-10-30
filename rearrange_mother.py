@@ -162,7 +162,7 @@ def rearrange(tree, patientPerson):
             relationshipHolder = relative.find(".//relationshipHolder")
             # Since we are essentially creating a new relative, we need a completely new ID
             relationshipHolder.find(".//id").set('extension', str(currentId)) 
-            fatherId = currentId
+            OGfatherID = currentId
             currentId += 1
             # The original patient's father will have parent's (PGRMTH and PGRFTH)
             # Since they will not be in the new pedigree, we must remove them
@@ -171,7 +171,7 @@ def rearrange(tree, patientPerson):
 
             # Note that we are creating a new relative (father) that will be added to the HL7 later
             # rather than being appending now
-            father = relative
+            OGfather = relative
         elif((str)(relative.find(".//code").get('code')) == "NMTH"):
             # Since the new patient is the mother, we must collect some data about her that will be
             # added later in main.py after rearrangment
@@ -184,7 +184,7 @@ def rearrange(tree, patientPerson):
     # Create a new relative element for the original patient
     # This action is completed here to ensure that the original patient's father's ID has already been created
     originalPatient = ET.Element('relative', classCode = "PRS")
-    originalPatientID = makeRelativeForOldPatient(originalPatient, fatherId, currentId)
+    originalPatientID = makeRelativeForOldPatient(originalPatient, OGfatherID, currentId)
     currentId += 1
 
     # Create new grandparents. These will be updated if the original patient had great-grandparents. Otherwise, they will stay blank.
@@ -234,7 +234,7 @@ def rearrange(tree, patientPerson):
                     relationshipHolderNew.find('id').set('extension', "1")
                 elif(x.find('code').get('code') == "NFTH"):
                     relationshipHolderNew = x.find('relationshipHolder')
-                    relationshipHolderNew.find('id').set('extension', str(fatherId)) 
+                    relationshipHolderNew.find('id').set('extension', str(OGfatherID)) 
             patientPerson.append(relative)
 
         # Brother -> Son
@@ -250,7 +250,7 @@ def rearrange(tree, patientPerson):
                     relationshipHolderNew.find('id').set('extension', "1")
                 elif(x.find('code').get('code') == "NFTH"):
                     relationshipHolderNew = x.find('relationshipHolder')
-                    relationshipHolderNew.find('id').set('extension', str(fatherId))
+                    relationshipHolderNew.find('id').set('extension', str(OGfatherID))
             patientPerson.append(relative)
 
         # Maternal Aunt -> Sister
@@ -435,9 +435,9 @@ def rearrange(tree, patientPerson):
                     if(fatherID == "1"):
                         relationshipHolderNew.find('id').set('extension', str(originalPatientID))
             patientPerson.append(relative)
-        # TODO Granddaughter -> Great Granddaughter
+        #Granddaughter -> Not Available
         elif((str)(relative.find('code').get('code'))== "GRNDDAU"):
-            relative.find(".//code").set('code', "GGRNDDAU")
+            relative.find(".//code").set('code', "NotAvailable")
             relationshipHolder = relative.find(".//relationshipHolder")
 
             # In case one of their parents is "Not Available", we will add both to our 'notAvailableIdsToAdd' array
@@ -451,9 +451,9 @@ def rearrange(tree, patientPerson):
                     fatherID = relationshipHolderNew.find('id').get('extension')
                     globalVars.notAvailableIdsToAdd.append(fatherID)
             patientPerson.append(relative)
-        # TODO Grandson -> Great Grandson
+        # Grandson -> Not Available
         elif((str)(relative.find('code').get('code'))== "GRNDSON"):
-            relative.find(".//code").set('code', "GGRNDSON")
+            relative.find(".//code").set('code', "NotAvailable")
             relationshipHolder = relative.find(".//relationshipHolder")
 
             # In case one of their parents is "Not Available", we will add both to our 'notAvailableIdsToAdd' array
@@ -539,7 +539,7 @@ def rearrange(tree, patientPerson):
                         if int(fatherID) == 1:
                             relationshipHolderNew.find('id').set('extension', str(originalPatientID))
                         if int(fatherID) == 3:
-                            relationshipHolderNew.find('id').set('extension', str(fatherID))
+                            relationshipHolderNew.find('id').set('extension', str(OGfatherID))
                         if int(fatherID) == 5:
                             relationshipHolderNew.find('id').set('extension', "3") 
             
@@ -571,5 +571,5 @@ def rearrange(tree, patientPerson):
                 patientPerson.append(relative)
 
     # Finally, we will add the father relative (new patient's spouse) and the original patient's relative that was created earlier
-    patientPerson.append(father)
+    patientPerson.append(OGfather)
     patientPerson.append(originalPatient)
