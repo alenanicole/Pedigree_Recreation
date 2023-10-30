@@ -16,6 +16,8 @@ import rearrange_maunt
 import rearrange_paunt
 import rearrange_muncle
 import rearrange_puncle
+import rearrange_mgrnmother
+import rearrange_pgrnmother
 
 class Frame(ct.CTkFrame):
     def __init__(self, master, **kwargs):
@@ -53,6 +55,10 @@ def switchCode(code):
         return "Daughter -- "
     elif code == "SON":
         return "Son -- "
+    elif code == "GRNDDAU":
+        return "Granddaughter -- "
+    elif code == "GRNDSON":
+        return "Grandson -- "
     elif code == "NSIS":
         return "Sister -- "
     elif code == "NBRO":
@@ -76,7 +82,7 @@ def switchCode(code):
     elif code == "COUSN":
         return "Cousin -- "
     elif code == "NotAvailable":
-        return "Not Available -- "
+        return "Unknown Relationship -- "
     elif code == "MGGRFTH":
         return "Maternal Great-Grandfather -- "
     elif code == "PGGRFTH":
@@ -86,8 +92,7 @@ def switchCode(code):
     elif code == "PGGRMTH":
         return "Paternal Great-Grandmother -- "
     
-
-    return str(code)
+    return (str(code) + " -- ")
 
 def checkAvailable(code):
     if code == "NMTH":
@@ -105,6 +110,10 @@ def checkAvailable(code):
     elif code == "DAU":
         return True
     elif code == "SON":
+        return True
+    elif code == "GRNDDAU":
+        return True
+    elif code == "GRNDSON":
         return True
     elif code == "NSIS":
         return True
@@ -168,6 +177,15 @@ def upload_file():
             codeText = code.get('code')
             if(str(codeText) == "NotAvailable"):
                 globalVars.relativesArray.append(relative)
+                relationshipHolder = relative.find('relationshipHolder')
+                name = relationshipHolder.find('name')
+                if(name is not None):
+                    given = name.find('given').text
+                    family = name.find('family').text
+                else:
+                    given = ""
+                    family = ""
+
                 relativeData = ""
                 relativeData += switchCode(codeText)
                 relativeData += validateName(given) + " " + validateName(family)
@@ -242,6 +260,9 @@ def upload_file():
 
 def output_family(tree):
     change_to_choose_patient()
+    label1 = ct.CTkLabel(master=choose_patient, text="Additional Relatives with Insufficient Data for Reorientation:")
+    label2 = ct.CTkLabel(master=choose_patient, text="------------------------------------------------------------------------------------")
+
     radio_var = ct.IntVar(value=0)
     i = 0
     for relativeData in globalVars.relatives:
@@ -253,15 +274,12 @@ def output_family(tree):
     button.grid(row=i, column=0, padx=20, pady=20)
     i += 1
 
-    label = ct.CTkLabel(master=choose_patient, text="Additional Relatives with Insufficient Data for Reorientation:")
-    label.grid(row=i, column=0, padx=20, pady=(10, 0), sticky="w")
+    label1.grid(row=i, column=0, padx=20, pady=(10, 0), sticky="w")
     i += 1    
     
-    label = ct.CTkLabel(master=choose_patient, text="------------------------------------------------------------------------------------")
-    label.grid(row=i, column=0, padx=20, pady=(10, 0), sticky="w")
+    label2.grid(row=i, column=0, padx=20, pady=(10, 0), sticky="w")
     i += 1
 
-    
     for relativeData in globalVars.unavailableRelatives:
         label = ct.CTkLabel(master=choose_patient, text=relativeData)
         label.grid(row=i, column=0, padx=20, pady=(10, 0), sticky="w")
@@ -298,7 +316,7 @@ def add_data(idx, tree):
 
 def reorient_file(first_name,last_name, dob, mrn, idx, tree):
     change_to_loading()
-    print(first_name, last_name, dob, mrn)
+    # print(first_name, last_name, dob, mrn)
     ext = str(int(tree.find('.id').get("extension")) + 1)
     clinicName = tree.find(".//text").text
     today = date.today()
@@ -351,6 +369,14 @@ def reorient_file(first_name,last_name, dob, mrn, idx, tree):
     if(str(globalVars.codes[idx]) == "DAU"):
         rearrange_daughter.rearrange(tree, patientPerson)
     # grandparent
+    if(str(globalVars.codes[idx])== "MGRMTH"):
+       rearrange_mgrnmother.rearrange(tree, patientPerson)
+    if(str(globalVars.codes[idx])== "PGRMTH"):
+       rearrange_pgrnmother.rearrange(tree, patientPerson)
+    if(str(globalVars.codes[idx])== "MGRFTH"):
+       rearrange_mgrnmother.rearrange(tree, patientPerson)
+    if(str(globalVars.codes[idx])== "PGRFTH"):
+       rearrange_mgrnmother.rearrange(tree, patientPerson)
     # aunt
     if(str(globalVars.codes[idx]) == "MAUNT"):
         rearrange_maunt.rearrange(tree, patientPerson, globalVars.ids[idx])
@@ -439,6 +465,8 @@ def back():
 
 def reset():
     globalVars.reset()
+    for widgets in choose_patient.winfo_children():
+      widgets.destroy()
     change_to_upload()
 
 def change_to_download(tree, filename):
