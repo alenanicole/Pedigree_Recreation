@@ -18,6 +18,9 @@ import rearrange_muncle
 import rearrange_puncle
 import rearrange_mgrnmother
 import rearrange_pgrnmother
+import rearrange_pgrnfather
+import rearrange_mgrnfather
+import rearrange_grandchild
 
 class Frame(ct.CTkFrame):
     def __init__(self, master, **kwargs):
@@ -164,6 +167,12 @@ def upload_file():
         globalVars.originalGender = patientPerson.find('administrativeGenderCode').get('code')
         globalVars.originalDOB = patientPerson.find('birthTime').get('value')
         globalVars.originalDeceased = patientPerson.find('deceasedInd').get('value')
+        raceCode = patientPerson.find('raceCode')
+        if(raceCode is not None):
+            globalVars.originalRace = raceCode
+        ethnicCode = patientPerson.find('ethnicGroupCode')
+        if(ethnicCode is not None):
+            globalVars.originalEthnicity = ethnicCode
 
         for subjectOf1Data in patient.findall("subjectOf1"):
             globalVars.subjectOf1.append(subjectOf1Data)
@@ -220,12 +229,18 @@ def upload_file():
                     globalVars.maternalSideIDS.append(currentID)
                 elif(codeText[0] == "P"):
                     globalVars.paternalSideIDS.append(currentID)
-                elif(codeText == "NSIS" or codeText == "NBRO"):
+                elif(codeText == "NSIS" or codeText == "NBRO" or codeText == "DAU" or codeText == "SON" or codeText == "GRNDDAU" or codeText == "GRNDSON"):
                     globalVars.maternalSideIDS.append(currentID)
                     globalVars.paternalSideIDS.append(currentID)
                 globalVars.genders.append(relationshipHolder.find('administrativeGenderCode').get('code'))
                 isDeceased = relationshipHolder.find('deceasedInd').get('value')
                 globalVars.deceased.append(isDeceased)
+
+                raceCode = relationshipHolder.find('raceCode')
+                globalVars.race.append(raceCode)
+                ethnicCode = relationshipHolder.find('ethnicGroupCode')
+                globalVars.ethnicity.append(ethnicCode)
+    
             elif((numOfMoth != 0 and str(codeText) != "NMTH") and (numOfFath != 0 and str(codeText) != "NFTH")):
                 globalVars.relativesArray.append(relative)
                 relativeData = ""
@@ -248,6 +263,21 @@ def upload_file():
                 globalVars.genders.append(relationshipHolder.find('administrativeGenderCode').get('code'))
                 isDeceased = relationshipHolder.find('deceasedInd').get('value')
                 globalVars.deceased.append(isDeceased)
+                raceCode = relationshipHolder.find('raceCode')
+                globalVars.race.append(raceCode)
+                ethnicCode = relationshipHolder.find('ethnicGroupCode')
+                globalVars.ethnicity.append(ethnicCode)
+    
+                # raceCode = relationshipHolder.find('raceCode')
+                # if(raceCode is not None):
+                #     globalVars.race.append(raceCode.get('code'))
+                # else:
+                #     globalVars.race.append(" ")
+                # ethnicCode = relationshipHolder.find('ethnicGroupCode')
+                # if(ethnicCode is not None):
+                #     globalVars.ethnicity.append(ethnicCode.get('code'))
+                # else:
+                #     globalVars.ethnicity.append(" ")
 
             if(subjectOf1 is not None):
                 if(isDeceased == "false"):
@@ -343,6 +373,10 @@ def reorient_file(first_name,last_name, dob, mrn, idx, tree):
     ET.SubElement(patientPerson,'administrativeGenderCode', code=globalVars.genders[idx])
     ET.SubElement(patientPerson, 'birthTime', value=dob)
     ET.SubElement(patientPerson, 'deceasedInd', value=globalVars.deceased[idx])
+    if(globalVars.race[idx] is not None):
+        patientPerson.append(globalVars.race[idx])
+    if(globalVars.ethnicity[idx] is not None):
+        patientPerson.append(globalVars.ethnicity[idx])
 
     # Break out for rearranging
 
@@ -374,9 +408,12 @@ def reorient_file(first_name,last_name, dob, mrn, idx, tree):
     if(str(globalVars.codes[idx])== "PGRMTH"):
        rearrange_pgrnmother.rearrange(tree, patientPerson)
     if(str(globalVars.codes[idx])== "MGRFTH"):
-       rearrange_mgrnmother.rearrange(tree, patientPerson)
+       rearrange_mgrnfather.rearrange(tree, patientPerson)
     if(str(globalVars.codes[idx])== "PGRFTH"):
-       rearrange_mgrnmother.rearrange(tree, patientPerson)
+       rearrange_pgrnfather.rearrange(tree, patientPerson)
+    # grandchild
+    if(str(globalVars.codes[idx]) == "GRNDDAU" or str(globalVars.codes[idx]) == "GRNDSON"):
+        rearrange_grandchild.rearrange(tree, patientPerson, globalVars.ids[idx])
     # aunt
     if(str(globalVars.codes[idx]) == "MAUNT"):
         rearrange_maunt.rearrange(tree, patientPerson, globalVars.ids[idx])

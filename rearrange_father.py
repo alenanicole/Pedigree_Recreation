@@ -18,6 +18,11 @@ def makeRelativeForOldPatient(originalPatient, motherId, currentId):
     ET.SubElement(patientRelationshipHolder, 'administrativeGenderCode', code = globalVars.originalGender)
     ET.SubElement(patientRelationshipHolder, 'birthTime', code = globalVars.originalDOB)
     ET.SubElement(patientRelationshipHolder, 'deceasedInd', value = globalVars.originalDeceased)
+    if(globalVars.originalRace is not None):
+        patientRelationshipHolder.append(globalVars.originalRace)
+    if(globalVars.originalEthnicity is not None):
+        patientRelationshipHolder.append(globalVars.originalEthnicity)
+    
     NMTHRelative = ET.SubElement(patientRelationshipHolder, 'relative', classCode = "PRS")
     ET.SubElement(NMTHRelative, 'code', code = "NMTH")
     relationshipHolderNew = ET.SubElement(NMTHRelative, 'relationshipHolder', classCode="PSN", determinerCode="INSTANCE")

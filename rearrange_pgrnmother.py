@@ -19,6 +19,11 @@ def makeRelativeForOldPatient(originalPatient, fatherId, motherId, currentId):
     ET.SubElement(patientRelationshipHolder, 'administrativeGenderCode', code = globalVars.originalGender)
     ET.SubElement(patientRelationshipHolder, 'birthTime', code = globalVars.originalDOB)
     ET.SubElement(patientRelationshipHolder, 'deceasedInd', value = globalVars.originalDeceased)
+    if(globalVars.originalRace is not None):
+        patientRelationshipHolder.append(globalVars.originalRace)
+    if(globalVars.originalEthnicity is not None):
+        patientRelationshipHolder.append(globalVars.originalEthnicity)
+    
     NMTHRelative = ET.SubElement(patientRelationshipHolder, 'relative', classCode = "PRS")
     ET.SubElement(NMTHRelative, 'code', code = "NMTH")
     relationshipHolderNew = ET.SubElement(NMTHRelative, 'relationshipHolder', classCode="PSN", determinerCode="INSTANCE")
@@ -105,12 +110,12 @@ def rearrange(tree, patientPerson):
             relationshipHolder.find(".//id").set('extension', str(currentId)) 
             OGmotherID = currentId
             currentId += 1
-            # The original patient's father will have parent's (PGRMTH and PGRFTH)
+            # The original patient's mother will have parent's (MGRMTH and MGRFTH)
             # Since they will not be in the new pedigree, we must remove them
             for x in relationshipHolder.findall(".//relative"):
                 relationshipHolder.remove(x)
 
-            # Note that we are creating a new relative (father) that will be added to the HL7 later
+            # Note that we are creating a new relative (mother) that will be added to the HL7 later
             # rather than being appending now
             OGmother = relative
         # Father -> Son
@@ -121,8 +126,8 @@ def rearrange(tree, patientPerson):
             OGfatherID = currentId
             currentId += 1
  
-            # Link mother -> new patient
-            # Link father -> new relative created for father
+            # Link mother -> new relative created for mother
+            # Link father -> new patient
             for x in relationshipHolder.findall(".//relative"):
                 if(x.find('code').get('code') == "NMTH"):
                     relationshipHolderNew = x.find('relationshipHolder')
@@ -145,6 +150,9 @@ def rearrange(tree, patientPerson):
     ET.SubElement(NewMotherRelative, 'code', code="NMTH")
     relationshipHolderNew = ET.SubElement(NewMotherRelative, 'relationshipHolder', classCode="PSN", determinerCode="INSTANCE")
     ET.SubElement(relationshipHolderNew, 'id', extension="2")
+    name = ET.SubElement(relationshipHolderNew, 'name')
+    ET.SubElement(name, 'given')
+    ET.SubElement(name, 'family')
     ET.SubElement(relationshipHolderNew, 'administrativeGenderCode', code="F")
     ET.SubElement(relationshipHolderNew, 'deceasedInd', value = "false")
     mother = ET.SubElement(relationshipHolderNew, 'relative', classCode = "PRS")
@@ -160,6 +168,9 @@ def rearrange(tree, patientPerson):
     ET.SubElement(NewFatherRelative, 'code', code="NFTH")
     relationshipHolderNew = ET.SubElement(NewFatherRelative, 'relationshipHolder', classCode="PSN", determinerCode="INSTANCE")
     ET.SubElement(relationshipHolderNew, 'id', extension="3")
+    name = ET.SubElement(relationshipHolderNew, 'name')
+    ET.SubElement(name, 'given')
+    ET.SubElement(name, 'family')
     ET.SubElement(relationshipHolderNew, 'administrativeGenderCode', code="M")
     ET.SubElement(relationshipHolderNew, 'deceasedInd', value = "false")
     mother = ET.SubElement(relationshipHolderNew, 'relative', classCode = "PRS")
@@ -565,7 +576,7 @@ def rearrange(tree, patientPerson):
             if(id in globalVars.notAvailableIdsToAdd):
                 patientPerson.append(relative)
 
-    # Finally, we will add the mother relative (new patient's spouse), father relative, grandfather relative,
+    # Finally, we will add the mother relative, father relative, grandfather relative (new patient's spouse),
     # and the original patient's relative that was created earlier
     patientPerson.append(grandfather)
     patientPerson.append(OGfather)

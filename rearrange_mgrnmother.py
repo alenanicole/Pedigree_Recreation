@@ -19,6 +19,11 @@ def makeRelativeForOldPatient(originalPatient, fatherId, motherId, currentId):
     ET.SubElement(patientRelationshipHolder, 'administrativeGenderCode', code = globalVars.originalGender)
     ET.SubElement(patientRelationshipHolder, 'birthTime', code = globalVars.originalDOB)
     ET.SubElement(patientRelationshipHolder, 'deceasedInd', value = globalVars.originalDeceased)
+    if(globalVars.originalRace is not None):
+        patientRelationshipHolder.append(globalVars.originalRace)
+    if(globalVars.originalEthnicity is not None):
+        patientRelationshipHolder.append(globalVars.originalEthnicity)
+
     NMTHRelative = ET.SubElement(patientRelationshipHolder, 'relative', classCode = "PRS")
     ET.SubElement(NMTHRelative, 'code', code = "NMTH")
     relationshipHolderNew = ET.SubElement(NMTHRelative, 'relationshipHolder', classCode="PSN", determinerCode="INSTANCE")
@@ -146,6 +151,9 @@ def rearrange(tree, patientPerson):
     ET.SubElement(NewMotherRelative, 'code', code="NMTH")
     relationshipHolderNew = ET.SubElement(NewMotherRelative, 'relationshipHolder', classCode="PSN", determinerCode="INSTANCE")
     ET.SubElement(relationshipHolderNew, 'id', extension="2")
+    name = ET.SubElement(relationshipHolderNew, 'name')
+    ET.SubElement(name, 'given')
+    ET.SubElement(name, 'family')
     ET.SubElement(relationshipHolderNew, 'administrativeGenderCode', code="F")
     ET.SubElement(relationshipHolderNew, 'deceasedInd', value = "false")
     mother = ET.SubElement(relationshipHolderNew, 'relative', classCode = "PRS")
@@ -161,6 +169,9 @@ def rearrange(tree, patientPerson):
     ET.SubElement(NewFatherRelative, 'code', code="NFTH")
     relationshipHolderNew = ET.SubElement(NewFatherRelative, 'relationshipHolder', classCode="PSN", determinerCode="INSTANCE")
     ET.SubElement(relationshipHolderNew, 'id', extension="3")
+    name = ET.SubElement(relationshipHolderNew, 'name')
+    ET.SubElement(name, 'given')
+    ET.SubElement(name, 'family')
     ET.SubElement(relationshipHolderNew, 'administrativeGenderCode', code="M")
     ET.SubElement(relationshipHolderNew, 'deceasedInd', value = "false")
     mother = ET.SubElement(relationshipHolderNew, 'relative', classCode = "PRS")
@@ -566,7 +577,7 @@ def rearrange(tree, patientPerson):
             if(id in globalVars.notAvailableIdsToAdd):
                 patientPerson.append(relative)
 
-    # Finally, we will add the father relative (new patient's spouse), mother relative, grandfather relative,
+    # Finally, we will add the father relative, mother relative, grandfather relative (new patient's spouse),
     # and the original patient's relative that was created earlier
     patientPerson.append(grandfather)
     patientPerson.append(OGmother)

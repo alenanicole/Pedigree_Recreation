@@ -20,6 +20,10 @@ def reset():
     ages.clear()
     global ids
     ids.clear()
+    global race
+    race.clear()
+    global ethnicity
+    ethnicity.clear()
 
     global originalGivenName 
     originalGivenName = ""
@@ -31,6 +35,10 @@ def reset():
     originalDOB = ""
     global originalDeceased
     originalDeceased = ""
+    global originalRace
+    originalRace = None
+    global originalEthnicity
+    originalEthnicity = None
     global subjectOf2
     subjectOf2.clear()
     global subjectOf1
@@ -64,12 +72,16 @@ genders = []
 deceased = []
 ages = []
 ids = []
+race = []
+ethnicity = []
 
 originalGivenName = ""
 originalFamilyName = ""
 originalGender = ""
 originalDOB = ""
 originalDeceased = ""
+originalRace = None
+originalEthnicity = None
 subjectOf2 = []
 subjectOf1 = []
 
