@@ -19,6 +19,11 @@ def makeRelativeForOldPatient(originalPatient, fatherId, motherId, currentId):
     ET.SubElement(patientRelationshipHolder, 'administrativeGenderCode', code = globalVars.originalGender)
     ET.SubElement(patientRelationshipHolder, 'birthTime', code = globalVars.originalDOB)
     ET.SubElement(patientRelationshipHolder, 'deceasedInd', value = globalVars.originalDeceased)
+    if(globalVars.originalRace is not None):
+        patientRelationshipHolder.append(globalVars.originalRace)
+    if(globalVars.originalEthnicity is not None):
+        patientRelationshipHolder.append(globalVars.originalEthnicity)
+        
     NMTHRelative = ET.SubElement(patientRelationshipHolder, 'relative', classCode = "PRS")
     ET.SubElement(NMTHRelative, 'code', code = "NMTH")
     relationshipHolderNew = ET.SubElement(NMTHRelative, 'relationshipHolder', classCode="PSN", determinerCode="INSTANCE")
@@ -540,13 +545,15 @@ def rearrange(tree, patientPerson, newPatientOldID):
                     motherID = relationshipHolderNew.find('id').get('extension')
                     if motherID in globalVars.maternalSideIDS:
                         motherFound = True
-                    if int(motherID) <= 7:
+                    if int(motherID) <= 7 or int(motherID) == int(newPatientOldID):
                         if int(motherID) == 1:
                             relationshipHolderNew.find('id').set('extension', str(originalPatientID))
                         if int(motherID) == 2:
                             relationshipHolderNew.find('id').set('extension', str(OGmotherID))
                         if int(motherID) == 4:
                             relationshipHolderNew.find('id').set('extension', "2")   
+                        if int(motherID) == int(newPatientOldID):
+                            relationshipHolderNew.find('id').set('extension', "1")  
                 # Check if the "NotAvailable" relative's father is on the maternal side
                 # If their father falls in one of the first 7 ids, update accordingly
                 elif(x.find('code').get('code') == "NFTH"):
@@ -554,13 +561,15 @@ def rearrange(tree, patientPerson, newPatientOldID):
                     fatherID = relationshipHolderNew.find('id').get('extension')
                     if fatherID in globalVars.maternalSideIDS:
                         fatherFound = True
-                    if int(fatherID) <= 7:
+                    if int(fatherID) <= 7 or int(fatherID) == int(newPatientOldID):
                         if int(fatherID) == 1:
                             relationshipHolderNew.find('id').set('extension', str(originalPatientID))
                         if int(fatherID) == 3:
                             relationshipHolderNew.find('id').set('extension', str(OGfatherID))
                         if int(fatherID) == 5:
                             relationshipHolderNew.find('id').set('extension', "3") 
+                        if int(fatherID) == int(newPatientOldID):
+                            relationshipHolderNew.find('id').set('extension', "1")  
             
             # If they are on the maternal side, add themselves and their parents to notAvailableIdsToAdd array
             if(motherFound or fatherFound):
