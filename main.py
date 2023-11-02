@@ -329,6 +329,7 @@ def reorient_file(first_name,last_name, dob, mrn, idx, tree):
     # Break out for rearranging
 
     #Modify Relatives
+    ## Global variable array is for accessint the id of the relative before they became the patient
 
     #if new patient is
 
@@ -346,10 +347,10 @@ def reorient_file(first_name,last_name, dob, mrn, idx, tree):
         rearrange_father.rearrange(tree, patientPerson)
     # son
     if(str(globalVars.codes[idx]) == "SON"):
-        rearrange_son.rearrange(tree, patientPerson)
+        rearrange_son.rearrange(tree, patientPerson, globalVars.ids[idx])
     # daughter
     if(str(globalVars.codes[idx]) == "DAU"):
-        rearrange_daughter.rearrange(tree, patientPerson)
+        rearrange_daughter.rearrange(tree, patientPerson, globalVars.ids[idx])
     # grandparent
     # aunt
     if(str(globalVars.codes[idx]) == "MAUNT"):

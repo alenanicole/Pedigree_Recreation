@@ -3,7 +3,7 @@ from lxml import etree as ET
 
 #### MAKE relative for old patient
 # Create a new relative element to hold the original patient's information.
-# Since this function correlates to the rearrange_brother section, the original
+# Since this function correlates to the rearrange_sister section, the original
 # patient will become a brother or sister.
 def makeRelativeForOldPatient(originalPatient, currentId):
     # Determine if the old patient will be a brother or sister based on gender
@@ -66,7 +66,7 @@ def rearrange(tree, patientPerson, BeforePatientID):
         if((str)(relative.find('code').get('code'))== "NBRO"):
             patientPerson.append(relative)
 
-        # Sister -> Sister (they will not change)
+        # Sister -> Sister / Patient
         elif((str)(relative.find('code').get('code'))== "NSIS"):
             relationshipHolder = relative.find(".//relationshipHolder")
             id = relationshipHolder.find("id").get("extension")
@@ -157,8 +157,16 @@ def rearrange(tree, patientPerson, BeforePatientID):
 
             patientPerson.append(relative)
 
-        # Niece and nephew children deal with?
-        #waiting for the codes of GreatNiece and GreatNephew. The ids won't be changing
+        # Niece and nephew children are "NotAvailable" 
+        # Grand(son/daughter) -> "Not Available"
+        # The ids won't be changing
+        elif((str)(relative.find('code').get('code'))== "GRNDDAU"):
+            relative.find(".//code").set('code', "NotAvailable") # Update to "NotAvailable" code
+            patientPerson.append(relative)
+
+        elif((str)(relative.find('code').get('code'))== "GRNDSON"):
+            relative.find(".//code").set('code', "NotAvailable") # Update to "NotAvailable" code
+            patientPerson.append(relative)
 
         # Not available change ids
         #check parents. if parent is old or new patient then update their ID
