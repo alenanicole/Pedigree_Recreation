@@ -67,7 +67,7 @@ def rearrange(tree, patientPerson, BeforePatientID):
     # This includes the mother, father, maternal grandmother, and maternal grandfather
     # The paternal grandmother and paternal grandfather are also included in these 6 relatives
     for relative in globalVars.relativesArray:
-        # Brother -> Brother and fix descendants
+        # Brother -> Brother / Patient
         if((str)(relative.find('code').get('code'))== "NBRO"):
             relationshipHolder = relative.find(".//relationshipHolder")
             id = relationshipHolder.find("id").get("extension")
@@ -162,8 +162,16 @@ def rearrange(tree, patientPerson, BeforePatientID):
 
             patientPerson.append(relative)
 
-        # Niece and nephew children deal with?
-        #waiting for the codes of GreatNiece and GreatNephew. The ids won't be changing
+        # Niece and nephew children are "NotAvailable" 
+        # Grand(son/daughter) -> "Not Available"
+        # The ids won't be changing
+        elif((str)(relative.find('code').get('code'))== "GRNDDAU"):
+            relative.find(".//code").set('code', "NotAvailable") # Update to "NotAvailable" code
+            patientPerson.append(relative)
+
+        elif((str)(relative.find('code').get('code'))== "GRNDSON"):
+            relative.find(".//code").set('code', "NotAvailable") # Update to "NotAvailable" code
+            patientPerson.append(relative)
 
         # Not available change ids
         #check parents. if parent is old or new patient then update their ID
