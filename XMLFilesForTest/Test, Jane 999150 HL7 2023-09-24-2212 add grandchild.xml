@@ -204,7 +204,7 @@
               <given>JaneDaughterHusband</given>
               <family />
             </name>
-            <administrativeGenderCode code="F" />
+            <administrativeGenderCode code="M" />
             <deceasedInd value="false" />
           </relationshipHolder>
           <subjectOf1 typeCode="SBJ">

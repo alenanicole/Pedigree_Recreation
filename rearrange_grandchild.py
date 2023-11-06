@@ -43,15 +43,23 @@ def determineFamilySide(newPatientOldID):
 # Create a new relative element to hold the original patient's information.
 # Since this function correlates to the rearrange_granddau section, the original
 # patient will become a grandmother or grandfather
-def makeRelativeForOldPatient(originalPatient, fatherId, motherId, currentId, sideOfFamily):
+def makeRelativeForOldPatient(originalPatient, fatherId, motherId, sideOfFamily):
     # Determine if the old patient will be a GRMTH or GRFTH on gender
+    originalPatientID = 0
     if(globalVars.originalGender == "F"):
         ET.SubElement(originalPatient, 'code', code = ((str)(sideOfFamily)) + "GRMTH")
+        if(str(sideOfFamily) == "M"):
+            originalPatientID = "4"
+        else:
+            originalPatientID = "6"
     else:
-        ET.SubElement(originalPatient, 'code', code = ((str)(sideOfFamily)) + "GRMTH")
+        ET.SubElement(originalPatient, 'code', code = ((str)(sideOfFamily)) + "GRFTH")
+        if(str(sideOfFamily) == "M"):
+            originalPatientID = "5"
+        else:
+            originalPatientID = "7"
     patientRelationshipHolder = ET.SubElement(originalPatient, 'relationshipHolder', classCode = "PSN", determinerCode="INSTANCE")
-    ET.SubElement(patientRelationshipHolder, 'id', extension = str(currentId))
-    originalPatientID = currentId
+    ET.SubElement(patientRelationshipHolder, 'id', extension = str(originalPatientID))
     name = ET.SubElement(patientRelationshipHolder, 'name')
     ET.SubElement(name, 'given').text = globalVars.originalGivenName
     ET.SubElement(name, 'family').text = globalVars.originalFamilyName
@@ -179,8 +187,7 @@ def rearrange(tree, patientPerson, newPatientOldID):
     # Create a new relative element for the original patient
     # This action is completed here to ensure that the original patient's parent's IDs has already been created
     originalPatient = ET.Element('relative', classCode = "PRS")
-    originalPatientID = makeRelativeForOldPatient(originalPatient, OGfatherID, OGmotherID, currentId, sideOfFamily)
-    currentId += 1
+    originalPatientID = makeRelativeForOldPatient(originalPatient, OGfatherID, OGmotherID, sideOfFamily)
 
     # Create new parents (these will get updated later)
     NewMotherRelative = ET.SubElement(patientPerson, 'relative', classCode="PRS")
@@ -556,6 +563,8 @@ def rearrange(tree, patientPerson, newPatientOldID):
             globalVars.notAvailableRelatives.append(relative) # Add each "NotAvailable" relative to an array
             motherID = 0
             fatherID = 0
+            motherFound = False
+            fatherFound = False
             relationshipHolder = relative.find(".//relationshipHolder")
             gender = relationshipHolder.find('administrativeGenderCode').get('code')
             id = relationshipHolder.find('id').get('extension')
@@ -583,23 +592,72 @@ def rearrange(tree, patientPerson, newPatientOldID):
                     if(x.find('code').get('code') == "NMTH"):
                         relationshipHolderNew = x.find('relationshipHolder')
                         relationshipHolderNew.find('id').set('extension', "6")
+                        motherFound = True
                     elif(x.find('code').get('code') == "NFTH"):
+                        fatherRelative = x
                         relationshipHolderNew = x.find('relationshipHolder')
                         relationshipHolderNew.find('id').set('extension', "7")
+                        fatherFound = True
+
+                # If they do not currently have a mother, add one
+                if(motherFound != True):
+                    relativeNew = ET.Element('relative', classCode="PRS")
+                    ET.SubElement(relativeNew, 'code', code="NMTH")
+                    relationshipHolderNew = ET.SubElement(relativeNew, 'relationshipHolder', classCode="PSN", determinerCode="INSTANCE")
+                    ET.SubElement(relationshipHolderNew, 'id', extension="6")
+                    if(fatherFound):
+                        relationshipHolder.insert(relationshipHolder.index(fatherRelative), relativeNew)
+                    else:
+                        relationshipHolder.append(relativeNew)
+                # If they do not currently have a father, add one
+                if(fatherFound != True):
+                    relativeNew = ET.SubElement(relationshipHolder, 'relative', classCode="PRS")
+                    ET.SubElement(relativeNew, 'code', code="NFTH")
+                    relationshipHolderNew = ET.SubElement(relativeNew, 'relationshipHolder', classCode="PSN", determinerCode="INSTANCE")
+                    ET.SubElement(relationshipHolderNew, 'id', extension="7")
+
                 patientPerson.insert(patientPerson.index(NewFatherRelative),relative)
                 patientPerson.remove(NewFatherRelative)
+
             elif(str(id) == str(newPatientMotherID)):
+                motherFound = False
+                fatherFound = False
+
                 relative.find(".//code").set('code', "NFTH")
                 relationshipHolder.find('id').set('extension', "2")
                 for x in relationshipHolder.findall(".//relative"):
                     if(x.find('code').get('code') == "NMTH"):
+                        motherFound = True
                         relationshipHolderNew = x.find('relationshipHolder')
                         relationshipHolderNew.find('id').set('extension', "4")
                     elif(x.find('code').get('code') == "NFTH"):
+                        fatherFound = True
+                        fatherRelative = x
                         relationshipHolderNew = x.find('relationshipHolder')
                         relationshipHolderNew.find('id').set('extension', "5")
+
+
+                
+                # If they do not currently have a mother, add one
+                if(motherFound != True):
+                    relativeNew = ET.Element('relative', classCode="PRS")
+                    ET.SubElement(relativeNew, 'code', code="NMTH")
+                    relationshipHolderNew = ET.SubElement(relativeNew, 'relationshipHolder', classCode="PSN", determinerCode="INSTANCE")
+                    ET.SubElement(relationshipHolderNew, 'id', extension="4")
+                    if(fatherFound):
+                        relationshipHolder.insert(relationshipHolder.index(fatherRelative), relativeNew)
+                    else:
+                        relationshipHolder.append(relativeNew)
+                # If they do not currently have a father, add one
+                if(fatherFound != True):
+                    relativeNew = ET.SubElement(relationshipHolder, 'relative', classCode="PRS")
+                    ET.SubElement(relativeNew, 'code', code="NFTH")
+                    relationshipHolderNew = ET.SubElement(relativeNew, 'relationshipHolder', classCode="PSN", determinerCode="INSTANCE")
+                    ET.SubElement(relationshipHolderNew, 'id', extension="5")
+
                 patientPerson.insert(patientPerson.index(NewMotherRelative),relative)
                 patientPerson.remove(NewMotherRelative)
+                
             else:
 
                 for x in relationshipHolder.findall(".//relative"):
@@ -690,7 +748,7 @@ def rearrange(tree, patientPerson, newPatientOldID):
     patientPerson.append(ogpgrfth)
     patientPerson.append(OGfather)
     patientPerson.append(OGmother)
-    patientPerson.append(originalPatient)
+
 
 newPatientMotherID = 0
 newPatientFatherID = 0
