@@ -21,6 +21,8 @@ import rearrange_pgrnmother
 import rearrange_pgrnfather
 import rearrange_mgrnfather
 import rearrange_grandchild
+import rearrange_mcousin
+import rearrange_pcousin
 
 class Frame(ct.CTkFrame):
     def __init__(self, master, **kwargs):
@@ -219,6 +221,7 @@ def upload_file():
                     globalVars.relatives.append(relativeData)
                 else:
                     globalVars.unavailableRelatives.append(relativeData)
+                    continue
 
                 globalVars.codes.append(codeText)
                 globalVars.first_names.append(validateName(given))
@@ -249,6 +252,7 @@ def upload_file():
                     globalVars.relatives.append(relativeData)
                 else:
                     globalVars.unavailableRelatives.append(relativeData)
+                    continue
 
                 globalVars.codes.append(codeText)
                 globalVars.first_names.append("")
@@ -267,17 +271,6 @@ def upload_file():
                 globalVars.race.append(raceCode)
                 ethnicCode = relationshipHolder.find('ethnicGroupCode')
                 globalVars.ethnicity.append(ethnicCode)
-    
-                # raceCode = relationshipHolder.find('raceCode')
-                # if(raceCode is not None):
-                #     globalVars.race.append(raceCode.get('code'))
-                # else:
-                #     globalVars.race.append(" ")
-                # ethnicCode = relationshipHolder.find('ethnicGroupCode')
-                # if(ethnicCode is not None):
-                #     globalVars.ethnicity.append(ethnicCode.get('code'))
-                # else:
-                #     globalVars.ethnicity.append(" ")
 
             if(subjectOf1 is not None):
                 if(isDeceased == "false"):
@@ -384,7 +377,7 @@ def reorient_file(first_name,last_name, dob, mrn, idx, tree):
     ## Global variable array is for accessint the id of the relative before they became the patient
 
     #if new patient is
-
+    
     # brother
     if(str(globalVars.codes[idx]) == "NBRO"):
         rearrange_brother.rearrange(tree, patientPerson, globalVars.ids[idx])
@@ -419,12 +412,17 @@ def reorient_file(first_name,last_name, dob, mrn, idx, tree):
     if(str(globalVars.codes[idx]) == "MAUNT"):
         rearrange_maunt.rearrange(tree, patientPerson, globalVars.ids[idx])
     if(str(globalVars.codes[idx]) == "PAUNT"):
-        rearrange_paunt.rearrange(tree, patientPerson)
+        rearrange_paunt.rearrange(tree, patientPerson, globalVars.ids[idx])
     # uncle    
     if(str(globalVars.codes[idx]) == "MUNCLE"):
         rearrange_muncle.rearrange(tree, patientPerson, globalVars.ids[idx])
     if(str(globalVars.codes[idx]) == "PUNCLE"):
-        rearrange_puncle.rearrange(tree, patientPerson)
+        rearrange_puncle.rearrange(tree, patientPerson, globalVars.ids[idx])
+    # cousin
+    if(str(globalVars.codes[idx]) == "MCOUSN"):
+        rearrange_mcousin.rearrange(tree, patientPerson, globalVars.ids[idx])
+    if(str(globalVars.codes[idx]) == "PCOUSN"):
+        rearrange_pcousin.rearrange(tree, patientPerson, globalVars.ids[idx])
 
     for data in globalVars.newPatientSubjectOf1:
         patient.append(data)
