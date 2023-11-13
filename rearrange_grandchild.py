@@ -106,13 +106,12 @@ def rearrange(tree, patientPerson, newPatientOldID):
     global newPatientFatherID
     global newPatientMotherID
     sideOfFamily = determineFamilySide(newPatientOldID)
-    currentMaxID = (int)(max(globalVars.ids))
 
-    mgrmthCode = currentMaxID + 1
-    mgrfthCode = currentMaxID + 2
-    pgrmthCode = currentMaxID + 3
-    pgrfthCode = currentMaxID + 4
-    currentId = currentMaxID + 5 # Any new relatives to be added will start with the next available ID
+    mgrmthCode = globalVars.currentMaxID + 1
+    mgrfthCode = globalVars.currentMaxID + 2
+    pgrmthCode = globalVars.currentMaxID + 3
+    pgrfthCode = globalVars.currentMaxID + 4
+    currentId = globalVars.currentMaxID + 5 # Any new relatives to be added will start with the next available ID
 
     # The first 6 members of the family will be dealt with first.
     # This includes the mother, father, maternal grandmother, and maternal grandfather
