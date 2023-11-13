@@ -191,7 +191,6 @@ def upload_file():
                 relationshipHolder = relative.find('relationshipHolder')
                 name = relationshipHolder.find('name')
                 currentID = str(relationshipHolder.find('id').get('extension'))
-                globalVars.ids.append(currentID)
                 if((int)(currentID) >= (int)(globalVars.currentMaxID)):
                     globalVars.currentMaxID = currentID
                     
