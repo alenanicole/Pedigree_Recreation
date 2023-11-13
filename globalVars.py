@@ -25,6 +25,8 @@ def reset():
     global ethnicity
     ethnicity.clear()
 
+    currentMaxID = 0
+
     global originalGivenName 
     originalGivenName = ""
     global originalFamilyName
@@ -74,6 +76,7 @@ ages = []
 ids = []
 race = []
 ethnicity = []
+currentMaxID = 0
 
 originalGivenName = ""
 originalFamilyName = ""

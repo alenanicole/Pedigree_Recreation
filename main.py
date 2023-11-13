@@ -190,6 +190,11 @@ def upload_file():
                 globalVars.relativesArray.append(relative)
                 relationshipHolder = relative.find('relationshipHolder')
                 name = relationshipHolder.find('name')
+                currentID = str(relationshipHolder.find('id').get('extension'))
+                globalVars.ids.append(currentID)
+                if((int)(currentID) >= (int)(globalVars.currentMaxID)):
+                    globalVars.currentMaxID = currentID
+                    
                 if(name is not None):
                     given = name.find('given').text
                     family = name.find('family').text
@@ -228,6 +233,8 @@ def upload_file():
                 globalVars.last_names.append(validateName(family))
                 currentID = str(relationshipHolder.find('id').get('extension'))
                 globalVars.ids.append(currentID)
+                if((int)(currentID) >= (int)(globalVars.currentMaxID)):
+                    globalVars.currentMaxID = currentID
                 if(codeText[0] == "M"):
                     globalVars.maternalSideIDS.append(currentID)
                 elif(codeText[0] == "P"):
@@ -259,6 +266,8 @@ def upload_file():
                 globalVars.last_names.append("")
                 currentID = str(relationshipHolder.find('id').get('extension'))
                 globalVars.ids.append(currentID)
+                if((int)(currentID) >= (int)(globalVars.currentMaxID)):
+                    globalVars.currentMaxID = currentID
                 if(codeText[0] == "M"):
                     globalVars.maternalSideIDS.append(currentID)
                 elif(codeText[0] == "P"):
