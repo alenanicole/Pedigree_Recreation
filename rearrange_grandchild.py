@@ -41,7 +41,7 @@ def determineFamilySide(newPatientOldID):
     return familyside
 
 # Create a new relative element to hold the original patient's information.
-# Since this function correlates to the rearrange_granddau section, the original
+# Since this function correlates to the rearrange_grandchild section, the original
 # patient will become a grandmother or grandfather
 def makeRelativeForOldPatient(originalPatient, fatherId, motherId, sideOfFamily):
     # Determine if the old patient will be a GRMTH or GRFTH on gender
@@ -106,11 +106,13 @@ def rearrange(tree, patientPerson, newPatientOldID):
     global newPatientFatherID
     global newPatientMotherID
     sideOfFamily = determineFamilySide(newPatientOldID)
-    currentId = 100 # Any new relatives to be added will start with the ID of 100
-    mgrmthCode = 99
-    mgrfthCode = 98
-    pgrmthCode = 97
-    pgrfthCode = 96
+    currentMaxID = (int)(max(globalVars.ids))
+
+    mgrmthCode = currentMaxID + 1
+    mgrfthCode = currentMaxID + 2
+    pgrmthCode = currentMaxID + 3
+    pgrfthCode = currentMaxID + 4
+    currentId = currentMaxID + 5 # Any new relatives to be added will start with the next available ID
 
     # The first 6 members of the family will be dealt with first.
     # This includes the mother, father, maternal grandmother, and maternal grandfather
@@ -677,7 +679,7 @@ def rearrange(tree, patientPerson, newPatientOldID):
                             if int(motherID) == 6:
                                 relationshipHolderNew.find('id').set('extension', str(pgrmthCode))  
                             if int(motherID) == int(newPatientOldID):
-                                relationshipHolderNew.find('id').set('extension', "1")  
+                                relationshipHolderNew.find('id').set('extension', "1")
                     # Check if the "NotAvailable" relative's father is on the maternal side
                     # If their father falls in one of the first 7 ids, update accordingly
                     elif(x.find('code').get('code') == "NFTH"):
