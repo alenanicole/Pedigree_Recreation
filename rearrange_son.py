@@ -1,6 +1,31 @@
 import globalVars
 from lxml import etree as ET
 
+def determineFamilySide(BeforePatientID):
+    global newPatientMotherID
+    global newPatientFatherID
+    familyside = ""
+    for relative in globalVars.relativesArray:
+        if((str)(relative.find('code').get('code'))== "SON"):
+            relationshipHolder = relative.find(".//relationshipHolder")
+            id = relationshipHolder.find("id").get("extension")
+            if((str)(id) == (str)(BeforePatientID)):
+                for x in relationshipHolder.findall(".//relative"):
+                    if(x.find('code').get('code') == "NMTH"):
+                        relationshipHolderNew = x.find('relationshipHolder')
+                        motherID = relationshipHolderNew.find('id').get('extension')
+                        newPatientMotherID = motherID
+                        if(motherID in globalVars.maternalSideIDS or motherID in globalVars.paternalSideIDS):
+                            familyside = "M"
+                    elif(x.find('code').get('code') == "NFTH"):
+                        relationshipHolderNew = x.find('relationshipHolder')
+                        fatherID = relationshipHolderNew.find('id').get('extension')
+                        newPatientFatherID = fatherID
+                        if(fatherID in globalVars.maternalSideIDS or fatherID in globalVars.paternalSideIDS):
+                            familyside = "P"
+
+    return familyside
+
 # Create a new relative element to hold the original patient's information.
 # Since this function correlates to the rearrange_son section, the original
 # patient will become a mother or a father.
@@ -75,7 +100,16 @@ def makeRelativeForOldPatient(originalPatient):
     # 6 - Paternal Grandmother
     # 7 - Paternal Grandfather
 def rearrange(tree, patientPerson, BeforePatientID):
+    global newPatientFatherID
+    global newPatientMotherID
+    sideOfFamily = determineFamilySide(BeforePatientID)
+
     currentId = 100 # Any new relatives to be added will start with the ID of 100
+    mgrmthCode = 99
+    mgrfthCode = 98
+    pgrmthCode = 97
+    pgrfthCode = 96
+
     # variables to find the spouse's ID
     spouseIDfound = False
     spouseID = 1
@@ -86,16 +120,172 @@ def rearrange(tree, patientPerson, BeforePatientID):
 
     # The first 6 members of the family will be dealt with first.
     # This includes the mother, father, maternal grandmother, and maternal grandfather
-    # The paternal grandmother and paternal grandfather are also included in these 6 relatives
-    for relative in globalVars.relativesArray:
-        # Brother -> Uncle (Paternal or Maternal TBD)
-        if((str)(relative.find('code').get('code'))== "NBRO"):
-            if(originalPatientID == 2): # determine wether paternal or maternal
-                relative.find(".//code").set('code', "MUNCLE")
-                relationshipHolder = relative.find(".//relationshipHolder")
+    for x in range(6):
+        relative = globalVars.relativesArray[x]
+        # print(relative.find('code').get('code'))
+
+        # Maternal Grandmother -> (M/P) great grandmother
+        if((str)(relative.find('code').get('code'))== "MGRMTH"):
+            relative.find(".//code").set('code', ((str)(sideOfFamily) + "GGRMTH"))
+            relationshipHolder = relative.find(".//relationshipHolder")
+            relationshipHolder.find(".//id").set('extension', str(mgrmthCode)) 
+            ogmgrmth = relative
+        # Maternal Grandfather -> (M/P) great grandfather
+        elif((str)(relative.find('code').get('code'))== "MGRFTH"):
+            relative.find(".//code").set('code', ((str)(sideOfFamily) + "GGRFTH"))
+            relationshipHolder = relative.find(".//relationshipHolder")
+            relationshipHolder.find(".//id").set('extension', str(mgrfthCode))
+            ogmgrfth = relative
+        # Paternal Grandmother -> (M/P) great grandmother
+        elif((str)(relative.find('code').get('code'))== "PGRMTH"):
+            relative.find(".//code").set('code', ((str)(sideOfFamily) + "GGRMTH"))
+            relationshipHolder = relative.find(".//relationshipHolder")
+            relationshipHolder.find(".//id").set('extension', str(pgrmthCode))
+            ogpgrmth = relative
+        # Paternal Grandfather -> (M/P) great grandfather
+        elif((str)(relative.find('code').get('code'))== "PGRFTH"):
+            relative.find(".//code").set('code', ((str)(sideOfFamily) + "GGRFTH"))
+            relationshipHolder = relative.find(".//relationshipHolder")
+            relationshipHolder.find(".//id").set('extension', str(pgrfthCode))
+            ogpgrfth = relative
+        # Father -> (M/P) Grandfather 
+        elif((str)(relative.find(".//code").get('code')) == "NFTH"):
+            relative.find(".//code").set('code', ((str)(sideOfFamily) + "GRFTH"))
+            relationshipHolder = relative.find(".//relationshipHolder")
+            # Since we are essentially creating a new relative, we need a completely new ID
+            if(originalPatientID == 2):
+                relationshipHolder.find(".//id").set('extension',"5") 
             else:
-                relative.find(".//code").set('code', "PUNCLE")
-                relationshipHolder = relative.find(".//relationshipHolder")
+                relationshipHolder.find(".//id").set('extension',"7") 
+
+            # We need to update the original patient's parents to be the same as the new patient's
+            for x in relationshipHolder.findall(".//relative"):
+                if(x.find('code').get('code') == "NMTH"):
+                    relationshipHolderNew = x.find('relationshipHolder')
+                    relationshipHolderNew.find('id').set('extension', str(pgrmthCode))
+                elif(x.find('code').get('code') == "NFTH"):
+                    relationshipHolderNew = x.find('relationshipHolder')
+                    relationshipHolderNew.find('id').set('extension', str(pgrfthCode)) 
+
+            # Note that we are creating a new relative (father) that will be added to the HL7 later
+            # rather than being appending now
+            OGfather = relative
+        # Mother -> (M/P) Grandmother
+        elif((str)(relative.find(".//code").get('code')) == "NMTH"):
+            # The original patient's mother becomes the new patient's sister
+            relative.find(".//code").set('code', ((str)(sideOfFamily) + "GRMTH"))
+            relationshipHolder = relative.find(".//relationshipHolder")
+            # Since we are essentially creating a new relative, we need a completely new ID
+            if(originalPatientID == 2):
+                relationshipHolder.find(".//id").set('extension',"4") 
+            else:
+                relationshipHolder.find(".//id").set('extension',"6") 
+
+            # We need to update the original patient's parents to be the same as the new patient's
+            for x in relationshipHolder.findall(".//relative"):
+                if(x.find('code').get('code') == "NMTH"):
+                    relationshipHolderNew = x.find('relationshipHolder')
+                    relationshipHolderNew.find('id').set('extension', str(mgrmthCode))
+                elif(x.find('code').get('code') == "NFTH"):
+                    relationshipHolderNew = x.find('relationshipHolder')
+                    relationshipHolderNew.find('id').set('extension', str(mgrfthCode)) 
+
+            # Note that we are creating a new relative (mother) that will be added to the HL7 later
+            # rather than being appending now
+            OGmother = relative
+
+
+    # add the new mother if the old patient was female
+    if(originalPatientID == 2):
+        patientPerson.append(originalPatient)
+
+        # add father to update later
+        NewFatherRelative = ET.SubElement(patientPerson, 'relative', classCode="PRS")
+        ET.SubElement(NewFatherRelative, 'code', code="NFTH")
+        relationshipHolderNew = ET.SubElement(NewFatherRelative, 'relationshipHolder', classCode="PSN", determinerCode="INSTANCE")
+        ET.SubElement(relationshipHolderNew, 'id', extension="3")
+        name = ET.SubElement(relationshipHolderNew, 'name')
+        ET.SubElement(name, 'given')
+        ET.SubElement(name, 'family')
+        ET.SubElement(relationshipHolderNew, 'administrativeGenderCode', code="M")
+        ET.SubElement(relationshipHolderNew, 'deceasedInd', value = "false")
+        mother = ET.SubElement(relationshipHolderNew, 'relative', classCode = "PRS")
+        ET.SubElement(mother, 'code', code="NMTH")
+        relationshipHolderMother = ET.SubElement(mother, 'relationshipHolder', classCode="PSN", determinerCode="INSTANCE")
+        ET.SubElement(relationshipHolderMother, 'id', extension="6")
+        father = ET.SubElement(relationshipHolderNew, 'relative', classCode = "PRS")
+        ET.SubElement(father, 'code', code="NFTH")
+        relationshipHolderFather = ET.SubElement(father, 'relationshipHolder', classCode="PSN", determinerCode="INSTANCE")
+        ET.SubElement(relationshipHolderFather, 'id', extension="7")
+    else:
+        # add mother to update later
+        NewMotherRelative = ET.SubElement(patientPerson, 'relative', classCode="PRS")
+        ET.SubElement(NewMotherRelative, 'code', code="NMTH")
+        relationshipHolderNew = ET.SubElement(NewMotherRelative, 'relationshipHolder', classCode="PSN", determinerCode="INSTANCE")
+        ET.SubElement(relationshipHolderNew, 'id', extension="2")
+        name = ET.SubElement(relationshipHolderNew, 'name')
+        ET.SubElement(name, 'given')
+        ET.SubElement(name, 'family')
+        ET.SubElement(relationshipHolderNew, 'administrativeGenderCode', code="F")
+        ET.SubElement(relationshipHolderNew, 'deceasedInd', value = "false")
+        mother = ET.SubElement(relationshipHolderNew, 'relative', classCode = "PRS")
+        ET.SubElement(mother, 'code', code="NMTH")
+        relationshipHolderMother = ET.SubElement(mother, 'relationshipHolder', classCode="PSN", determinerCode="INSTANCE")
+        ET.SubElement(relationshipHolderMother, 'id', extension="4")
+        father = ET.SubElement(relationshipHolderNew, 'relative', classCode = "PRS")
+        ET.SubElement(father, 'code', code="NFTH")
+        relationshipHolderFather = ET.SubElement(father, 'relationshipHolder', classCode="PSN", determinerCode="INSTANCE")
+        ET.SubElement(relationshipHolderFather, 'id', extension="5")
+
+        patientPerson.append(originalPatient)
+
+    # Make grandparents, either the maternal or paternal side
+    if(sideOfFamily == "P"):
+        MGRMTHRelative = ET.SubElement(patientPerson, 'relative', classCode="PRS")
+        ET.SubElement(MGRMTHRelative, 'code', code="MGRMTH")
+        relationshipHolderNew = ET.SubElement(MGRMTHRelative, 'relationshipHolder', classCode="PSN", determinerCode="INSTANCE")
+        ET.SubElement(relationshipHolderNew, 'id', extension="4")
+        ET.SubElement(relationshipHolderNew, 'administrativeGenderCode', code="F")
+        ET.SubElement(relationshipHolderNew, 'deceasedInd', value = "false")
+
+        MGRFTHRelative = ET.SubElement(patientPerson, 'relative', classCode="PRS")
+        ET.SubElement(MGRFTHRelative, 'code', code="MGRFTH")
+        relationshipHolderNew = ET.SubElement(MGRFTHRelative, 'relationshipHolder', classCode="PSN", determinerCode="INSTANCE")
+        ET.SubElement(relationshipHolderNew, 'id', extension="5")
+        ET.SubElement(relationshipHolderNew, 'administrativeGenderCode', code="M")
+        ET.SubElement(relationshipHolderNew, 'deceasedInd', value = "false")
+
+        patientPerson.append(OGmother)
+        patientPerson.append(OGfather)
+
+    else:
+        patientPerson.append(OGmother)
+        patientPerson.append(OGfather)
+
+        PGRMTHRelative = ET.SubElement(patientPerson, 'relative', classCode="PRS")
+        ET.SubElement(PGRMTHRelative, 'code', code="PGRMTH")
+        relationshipHolderNew = ET.SubElement(PGRMTHRelative, 'relationshipHolder', classCode="PSN", determinerCode="INSTANCE")
+        ET.SubElement(relationshipHolderNew, 'id', extension="6")
+        ET.SubElement(relationshipHolderNew, 'administrativeGenderCode', code="F")
+        ET.SubElement(relationshipHolderNew, 'deceasedInd', value = "false")
+
+        PGRFTHRelative = ET.SubElement(patientPerson, 'relative', classCode="PRS")
+        ET.SubElement(PGRFTHRelative, 'code', code="PGRFTH")
+        relationshipHolderNew = ET.SubElement(PGRFTHRelative, 'relationshipHolder', classCode="PSN", determinerCode="INSTANCE")
+        ET.SubElement(relationshipHolderNew, 'id', extension="7")
+        ET.SubElement(relationshipHolderNew, 'administrativeGenderCode', code="M")
+        ET.SubElement(relationshipHolderNew, 'deceasedInd', value = "false")
+
+    # The first 6 members of the family will be dealt with first.
+    # This includes the mother, father, maternal grandmother, and maternal grandfather
+    # The paternal grandmother and paternal grandfather are also included in these 6 relatives
+    for x in range(6, len(globalVars.relativesArray)):
+        relative = globalVars.relativesArray[x]
+
+        # Sister -> Aunt (Paternal or Maternal TBD)
+        if((str)(relative.find('code').get('code'))== "NSIS"):
+            relative.find(".//code").set('code', ((str)(sideOfFamily) + "AUNT")) # auto makes aunt paternal or maternal
+            relationshipHolder = relative.find(".//relationshipHolder")
 
             # Fix the parent ids from their current #2 and #3 to #4-7
             for x in relationshipHolder.findall(".//relative"):
@@ -113,14 +303,10 @@ def rearrange(tree, patientPerson, BeforePatientID):
                         relationshipHolderNew.find('id').set('extension', "7")
             patientPerson.append(relative)
 
-        # Sister -> Aunt (Paternal or Maternal TBD)
-        elif((str)(relative.find('code').get('code'))== "NSIS"):
-            if(originalPatientID == 2): # determine wether paternal or maternal
-                relative.find(".//code").set('code', "MAUNT")
-                relationshipHolder = relative.find(".//relationshipHolder")
-            else:
-                relative.find(".//code").set('code', "PAUNT")
-                relationshipHolder = relative.find(".//relationshipHolder")
+        # Brother -> Uncle (Paternal or Maternal TBD)
+        elif((str)(relative.find('code').get('code'))== "NBRO"):
+            relative.find(".//code").set('code', ((str)(sideOfFamily) + "UNCLE")) # auto makes uncle paternal or maternal
+            relationshipHolder = relative.find(".//relationshipHolder")
 
             # Fix the parent ids from their current #2 and #3 to #4-7
             for x in relationshipHolder.findall(".//relative"):
@@ -136,6 +322,159 @@ def rearrange(tree, patientPerson, BeforePatientID):
                         relationshipHolderNew.find('id').set('extension', "5")
                     else: 
                         relationshipHolderNew.find('id').set('extension', "7")
+            patientPerson.append(relative)
+
+        # Maternal Aunt -> "NotAvailable"
+        elif((str)(relative.find('code').get('code'))== "MAUNT"):
+            relative.find(".//code").set('code', "NotAvailable") # Update to "NotAvailable"code
+            relationshipHolder = relative.find(".//relationshipHolder")
+
+            # Link mother -> og mgrmth
+            # Link father -> og mgrfth
+            for x in relationshipHolder.findall(".//relative"):
+                if(x.find('code').get('code') == "NMTH"):
+                    relationshipHolderNew = x.find('relationshipHolder')
+                    relationshipHolderNew.find('id').set('extension', str(mgrmthCode))
+                elif(x.find('code').get('code') == "NFTH"):
+                    relationshipHolderNew = x.find('relationshipHolder')
+                    relationshipHolderNew.find('id').set('extension', str(mgrfthCode))
+
+            patientPerson.append(relative)
+
+        # Paternal Aunt -> "NotAvailable"
+        elif((str)(relative.find('code').get('code'))== "PAUNT"):
+            relative.find(".//code").set('code', "NotAvailable") # Update to "NotAvailable"code
+            relationshipHolder = relative.find(".//relationshipHolder")
+
+            # Link mother -> og pgrmth
+            # Link father -> og pgrfth
+            for x in relationshipHolder.findall(".//relative"):
+                if(x.find('code').get('code') == "NMTH"):
+                    relationshipHolderNew = x.find('relationshipHolder')
+                    relationshipHolderNew.find('id').set('extension', str(pgrmthCode))
+                elif(x.find('code').get('code') == "NFTH"):
+                    relationshipHolderNew = x.find('relationshipHolder')
+                    relationshipHolderNew.find('id').set('extension', str(pgrfthCode))
+
+            patientPerson.append(relative)
+
+        # Maternal Uncle -> "NotAvailable"
+        elif((str)(relative.find('code').get('code'))== "MUNCLE"):
+            relative.find(".//code").set('code', "NotAvailable") # Update to "NotAvailable"code
+            relationshipHolder = relative.find(".//relationshipHolder")
+
+            # Link mother -> og mgrmth
+            # Link father -> og mgrfth
+            for x in relationshipHolder.findall(".//relative"):
+                if(x.find('code').get('code') == "NMTH"):
+                    relationshipHolderNew = x.find('relationshipHolder')
+                    relationshipHolderNew.find('id').set('extension', str(mgrmthCode))
+                elif(x.find('code').get('code') == "NFTH"):
+                    relationshipHolderNew = x.find('relationshipHolder')
+                    relationshipHolderNew.find('id').set('extension', str(mgrfthCode))
+            
+            patientPerson.append(relative)
+
+        # Paternal Uncle -> "NotAvailable"
+        elif((str)(relative.find('code').get('code'))== "PUNCLE"):
+            relative.find(".//code").set('code', "NotAvailable") # Update to "NotAvailable"code
+            relationshipHolder = relative.find(".//relationshipHolder")
+
+            # Link mother -> og pgrmth
+            # Link father -> og pgrfth
+            for x in relationshipHolder.findall(".//relative"):
+                if(x.find('code').get('code') == "NMTH"):
+                    relationshipHolderNew = x.find('relationshipHolder')
+                    relationshipHolderNew.find('id').set('extension', str(pgrmthCode))
+                elif(x.find('code').get('code') == "NFTH"):
+                    relationshipHolderNew = x.find('relationshipHolder')
+                    relationshipHolderNew.find('id').set('extension', str(pgrfthCode))
+            
+            patientPerson.append(relative)
+
+        # Niece -> Cousin (Paternal or Maternal TBD)
+        elif((str)(relative.find('code').get('code'))== "NIECE"):
+            relative.find(".//code").set('code', ((str)(sideOfFamily) + "COUSN")) # auto makes cousin paternal or maternal
+            
+            # add parents to NotAvailable array
+            for x in relationshipHolder.findall(".//relative"):
+                if(x.find('code').get('code') == "NMTH"):
+                    relationshipHolderNew = x.find('relationshipHolder')
+                    motherID = relationshipHolderNew.find('id').get('extension')
+                    globalVars.notAvailableIdsToAdd.append(motherID)
+                elif(x.find('code').get('code') == "NFTH"):
+                    relationshipHolderNew = x.find('relationshipHolder')
+                    fatherID = relationshipHolderNew.find('id').get('extension')
+                    globalVars.notAvailableIdsToAdd.append(fatherID)
+
+            patientPerson.append(relative)
+
+        # Nephew -> Cousin (Paternal or Maternal TBD)
+        elif((str)(relative.find('code').get('code'))== "NEPHEW"):
+            relative.find(".//code").set('code', ((str)(sideOfFamily) + "COUSN")) # auto makes cousin paternal or maternal
+            
+            # add parents to NotAvailable array
+            for x in relationshipHolder.findall(".//relative"):
+                if(x.find('code').get('code') == "NMTH"):
+                    relationshipHolderNew = x.find('relationshipHolder')
+                    motherID = relationshipHolderNew.find('id').get('extension')
+                    globalVars.notAvailableIdsToAdd.append(motherID)
+                elif(x.find('code').get('code') == "NFTH"):
+                    relationshipHolderNew = x.find('relationshipHolder')
+                    fatherID = relationshipHolderNew.find('id').get('extension')
+                    globalVars.notAvailableIdsToAdd.append(fatherID)
+
+            patientPerson.append(relative)
+
+        # Maternal Cousin -> "NotAvailable"
+        elif((str)(relative.find('code').get('code'))== "MCOUSN"):
+            relative.find(".//code").set('code', "NotAvailable") # Update to "NotAvailable" code
+            
+            # add parents to NotAvailable array
+            for x in relationshipHolder.findall(".//relative"):
+                if(x.find('code').get('code') == "NMTH"):
+                    relationshipHolderNew = x.find('relationshipHolder')
+                    motherID = relationshipHolderNew.find('id').get('extension')
+                    globalVars.notAvailableIdsToAdd.append(motherID)
+                elif(x.find('code').get('code') == "NFTH"):
+                    relationshipHolderNew = x.find('relationshipHolder')
+                    fatherID = relationshipHolderNew.find('id').get('extension')
+                    globalVars.notAvailableIdsToAdd.append(fatherID)
+
+            patientPerson.append(relative)
+
+        # Paternal Cousin -> "NotAvailable"
+        elif((str)(relative.find('code').get('code'))== "PCOUSN"):
+            relative.find(".//code").set('code', "NotAvailable") # Update to "NotAvailable" code
+            
+            # add parents to NotAvailable array
+            for x in relationshipHolder.findall(".//relative"):
+                if(x.find('code').get('code') == "NMTH"):
+                    relationshipHolderNew = x.find('relationshipHolder')
+                    motherID = relationshipHolderNew.find('id').get('extension')
+                    globalVars.notAvailableIdsToAdd.append(motherID)
+                elif(x.find('code').get('code') == "NFTH"):
+                    relationshipHolderNew = x.find('relationshipHolder')
+                    fatherID = relationshipHolderNew.find('id').get('extension')
+                    globalVars.notAvailableIdsToAdd.append(fatherID)
+
+            patientPerson.append(relative)
+
+        # Cousin -> "NotAvailable"
+        elif((str)(relative.find('code').get('code'))== "COUSN"):
+            relative.find(".//code").set('code', "NotAvailable") # Update to "NotAvailable" code
+            
+            # add parents to NotAvailable array
+            for x in relationshipHolder.findall(".//relative"):
+                if(x.find('code').get('code') == "NMTH"):
+                    relationshipHolderNew = x.find('relationshipHolder')
+                    motherID = relationshipHolderNew.find('id').get('extension')
+                    globalVars.notAvailableIdsToAdd.append(motherID)
+                elif(x.find('code').get('code') == "NFTH"):
+                    relationshipHolderNew = x.find('relationshipHolder')
+                    fatherID = relationshipHolderNew.find('id').get('extension')
+                    globalVars.notAvailableIdsToAdd.append(fatherID)
+
             patientPerson.append(relative)
 
         # Daughter -> Sister
@@ -143,7 +482,7 @@ def rearrange(tree, patientPerson, BeforePatientID):
             relative.find(".//code").set('code', "NSIS")
             relationshipHolder = relative.find(".//relationshipHolder")
 
-            # Link brother -> mother and father same as new patient
+            # Link sister -> mother and father same as new patient
             for x in relationshipHolder.findall(".//relative"):
                 if(x.find('code').get('code') == "NMTH"):
                     relationshipHolderNew = x.find('relationshipHolder')
@@ -168,7 +507,7 @@ def rearrange(tree, patientPerson, BeforePatientID):
             # If they are the patient, we will collect their subjectOf1 and subjectOf2 data 
             # Then we will move on to the next patient as they do not need to be added as a relative
             if((str)(id) == (str)(BeforePatientID)):
-                # Since the new patient is the daughter, we must collect some data about her that will be
+                # Since the new patient is the son, we must collect some data about him that will be
                 # added later in main.py after rearrangment
                 for subjectOf1Data in relative.findall('.//subjectOf1'):
                     globalVars.newPatientSubjectOf1.append(subjectOf1Data)
@@ -176,11 +515,11 @@ def rearrange(tree, patientPerson, BeforePatientID):
                     globalVars.newPatientSubjectOf1.append(subjectOf2Data)
                 continue
             else:
-                relative.find(".//code").set('code', "NBRO") # update to sister if not the new patient
+                relative.find(".//code").set('code', "NBRO") # update to brother if not the new patient
 
             relationshipHolder = relative.find(".//relationshipHolder")
 
-            # Link sister -> mother and father same as new patient
+            # Link brother -> mother and father same as new patient
             for x in relationshipHolder.findall(".//relative"):
                 if(x.find('code').get('code') == "NMTH"):
                     relationshipHolderNew = x.find('relationshipHolder')
@@ -199,322 +538,223 @@ def rearrange(tree, patientPerson, BeforePatientID):
 
             patientPerson.append(relative)
 
-        ## The grandparents will be the same side of the family 
-        ## All of them either Paternal or Maternal NO COMBINATION
-        # Mother -> Grandmother (Paternal or Maternal TBD)
-        elif((str)(relative.find('code').get('code'))== "NMTH"):
-            if(originalPatientID == 2): # determine wether paternal or maternal
-                relative.find(".//code").set('code', "MGRMTH")
-                relationshipHolder = relative.find(".//relationshipHolder")
-                relationshipHolder.find(".//id").set('extension', "4") # update from mother id to maternal grandma id
-            else:
-                relative.find(".//code").set('code', "PGRMTH")
-                relationshipHolder = relative.find(".//relationshipHolder")
-                relationshipHolder.find(".//id").set('extension', "6") # update from mother id to paternal grandma id
-
-            # Fix the parent ids from their current #4-7 to new currentIDs
+        # Grandchildren -> (niece/nephew) OR (son/daughter)
+        elif((str)(relative.find('code').get('code'))== "GRNDDAU"):
+            relationshipHolder = relative.find(".//relationshipHolder")
+            child = False
+            
+            #it is rearrange_son so if grandchild father is the new patient, change ID
             for x in relationshipHolder.findall(".//relative"):
-                if(x.find('code').get('code') == "NMTH"): # update NMTH to the correct great grandmotherID
+                if(x.find('code').get('code') == "NMTH"):
                     relationshipHolderNew = x.find('relationshipHolder')
-                    if(originalPatientID == 2):
-                        relationshipHolderNew.find('id').set('extension', str(currentId))
-                        currentId += 1
-                    else: 
-                        relationshipHolderNew.find('id').set('extension', str(currentId))
-                        currentId += 1
-                elif(x.find('code').get('code') == "NFTH"): # update NFTH to the correct great grandfatherID
+                    motherID = relationshipHolderNew.find('id').get('extension')
+                    globalVars.notAvailableIdsToAdd.append(motherID)
+                elif(x.find('code').get('code') == "NFTH"):
                     relationshipHolderNew = x.find('relationshipHolder')
-                    if(originalPatientID == 2):
-                        relationshipHolderNew.find('id').set('extension', str(currentId))
-                        currentId += 1
-                    else: 
-                        relationshipHolderNew.find('id').set('extension', str(currentId))
-                        currentId += 1
+                    fatherID = relationshipHolderNew.find('id').get('extension')
+                    globalVars.notAvailableIdsToAdd.append(fatherID)
+                    if(fatherID == BeforePatientID): # change id of father to patientID if his id matches BeforePatientID
+                        relationshipHolderNew.find('id').set('extension', "1")
+                        child = True
+                    
+            # Determine bro or nephew based on parents
+            if(child == False):
+                relative.find(".//code").set('code', "NIECE")
+            elif(child == True):
+                relative.find(".//code").set('code', "DAU")
+
             patientPerson.append(relative)
 
-        # Father -> Grandfather (Paternal or Maternal TBD)
-        elif((str)(relative.find('code').get('code'))== "NFTH"):
-            if(originalPatientID == 2): # determine wether paternal or maternal
-                relative.find(".//code").set('code', "MGRFTH")
-                relationshipHolder = relative.find(".//relationshipHolder")
-                relationshipHolder.find(".//id").set('extension', "5") # update from father id to maternal grandpa id
-            else:
-                relative.find(".//code").set('code', "PGRFTH")
-                relationshipHolder = relative.find(".//relationshipHolder")
-                relationshipHolder.find(".//id").set('extension', "7") # update from father id to paternal grandpa id
-
-            # Fix the parent ids from their current #4-7 to new currentIDs
+        # if the son is the new patient then change ID
+        elif((str)(relative.find('code').get('code'))== "GRNDSON"):
+            relationshipHolder = relative.find(".//relationshipHolder")
+            child = False
+            
+            #it is rearrange_son so if grandchild father is the new patient, change ID
             for x in relationshipHolder.findall(".//relative"):
-                if(x.find('code').get('code') == "NMTH"): # update NMTH to the correct great grandmotherID
+                if(x.find('code').get('code') == "NMTH"):
                     relationshipHolderNew = x.find('relationshipHolder')
-                    if(originalPatientID == 2):
-                        relationshipHolderNew.find('id').set('extension', str(currentId))
-                        currentId += 1
-                    else: 
-                        relationshipHolderNew.find('id').set('extension', str(currentId))
-                        currentId += 1
-                elif(x.find('code').get('code') == "NFTH"): # update NFTH to the correct great grandfatherID
+                    motherID = relationshipHolderNew.find('id').get('extension')
+                    globalVars.notAvailableIdsToAdd.append(motherID)
+                elif(x.find('code').get('code') == "NFTH"):
                     relationshipHolderNew = x.find('relationshipHolder')
-                    if(originalPatientID == 2):
-                        relationshipHolderNew.find('id').set('extension', str(currentId))
-                        currentId += 1
-                    else: 
-                        relationshipHolderNew.find('id').set('extension', str(currentId))
-                        currentId += 1
+                    fatherID = relationshipHolderNew.find('id').get('extension')
+                    globalVars.notAvailableIdsToAdd.append(fatherID)
+                    if(fatherID == BeforePatientID): # change id of father to patientID if his id matches BeforePatientID
+                        relationshipHolderNew.find('id').set('extension', "1")
+                        child = True
+            
+            # Determine sis or niece based on parents
+            if(child == False):
+                relative.find(".//code").set('code', "NEPHEW")
+            elif(child == True):
+                relative.find(".//code").set('code', "SON")
+
+            patientPerson.append(relative)
+
+        # Great-Grandmother -> not available
+        elif((str)(relative.find('code').get('code'))== "MGGRMTH" or (str)(relative.find('code').get('code'))== "PGGRMTH"):
+            relative.find(".//code").set('code', "NotAvailable")
+            relationshipHolder = relative.find(".//relationshipHolder")
+
+            patientPerson.append(relative)
+
+        # Great-Grandfather -> not available
+        elif((str)(relative.find('code').get('code'))== "MGGRFTH" or (str)(relative.find('code').get('code'))== "PGGRFTH"):
+            relative.find(".//code").set('code', "NotAvailable")
+            relationshipHolder = relative.find(".//relationshipHolder")
+
             patientPerson.append(relative)
 
         # need the spouse id from the Old patient to change from "NotAvailable"
         # to NFTH, then create the side of grandparents that are missing
         elif((str)(relative.find('code').get('code'))== "NotAvailable"):
-            if(spouseIDfound & spouseID != 1):
-                if(originalPatientID == 2): # if the patient is female then make him dad
-                    relative.find(".//code").set('code', "NFTH")
-                    relationshipHolder = relative.find(".//relationshipHolder")
-                    relationshipHolder.find(".//id").set('extension', "3") # update from spouseID to 3
-                else: # the patient is male and make her the mom
-                    relative.find(".//code").set('code', "NMTH")
-                    relationshipHolder = relative.find(".//relationshipHolder")
-                    relationshipHolder.find(".//id").set('extension', "2") # update from spouseID to 2
+            globalVars.notAvailableRelatives.append(relative) # Add each "NotAvailable" relative to an array
+            relationshipHolder = relative.find(".//relationshipHolder")
+            id = relationshipHolder.find('id').get('extension')
+            motherFound = False
+            fatherFound = False
 
-                spouseFatherFound = False
-                spouseMotherFound = False
-                FatherID = 0
-                MotherID = 0
-
-                # update spouse parent codes if they exist
+            if(str(id) == str(newPatientFatherID)):
+                relative.find(".//code").set('code', "NFTH")
+                relationshipHolder.find('id').set('extension', "3")
                 for x in relationshipHolder.findall(".//relative"):
-                    if(x.find('code').get('code') == "NMTH"): # update NMTH to the correct grandmotherID
+                    if(x.find('code').get('code') == "NMTH"):
                         relationshipHolderNew = x.find('relationshipHolder')
-                        MotherID = relationshipHolderNew.find('id').get('extension')
-                        if(originalPatientID == 2): # if old patient was mother, spouse parents are paternal
-                            relationshipHolderNew.find('id').set('extension', "6")
-                        else: # if old patient was father, spouse parents are maternal
-                            relationshipHolderNew.find('id').set('extension', "4")
-                        spouseMotherFound = True
-                    elif(x.find('code').get('code') == "NFTH"): # update NFTH to the correct great grandfatherID
+                        relationshipHolderNew.find('id').set('extension', "6")
+                        motherFound = True
+                    elif(x.find('code').get('code') == "NFTH"):
                         fatherRelative = x
                         relationshipHolderNew = x.find('relationshipHolder')
-                        FotherID = relationshipHolderNew.find('id').get('extension')
-                        if(originalPatientID == 2): # if old patient was mother, spouse parents are paternal
-                            relationshipHolderNew.find('id').set('extension', "7")
-                        else: # if old patient was father, spouse parents are maternal
-                            relationshipHolderNew.find('id').set('extension', "5")
-                        spouseFatherFound = True
-                
-                # either the paternal or maternal grandparents are missing and they must be present
-                # here they will be acknowledged as the correct grandparents to one of the new patient's parents
+                        relationshipHolderNew.find('id').set('extension', "7")
+                        fatherFound = True
 
                 # If they do not currently have a mother, add one
-                if(spouseMotherFound != True):
+                if(motherFound != True):
                     relativeNew = ET.Element('relative', classCode="PRS")
                     ET.SubElement(relativeNew, 'code', code="NMTH")
                     relationshipHolderNew = ET.SubElement(relativeNew, 'relationshipHolder', classCode="PSN", determinerCode="INSTANCE")
-                    if(originalPatientID == 2): # make sure spouse parent ids are correct
-                        ET.SubElement(relationshipHolderNew, 'id', extension="6")
+                    ET.SubElement(relationshipHolderNew, 'id', extension="6")
+                    if(fatherFound):
+                        relationshipHolder.insert(relationshipHolder.index(fatherRelative), relativeNew)
                     else:
-                        ET.SubElement(relationshipHolderNew, 'id', extension="4")
-                    if(spouseFatherFound):
+                        relationshipHolder.append(relativeNew)
+
+                # If they do not currently have a father, add one
+                if(fatherFound != True):
+                    relativeNew = ET.SubElement(relationshipHolder, 'relative', classCode="PRS")
+                    ET.SubElement(relativeNew, 'code', code="NFTH")
+                    relationshipHolderNew = ET.SubElement(relativeNew, 'relationshipHolder', classCode="PSN", determinerCode="INSTANCE")
+                    ET.SubElement(relationshipHolderNew, 'id', extension="7")
+
+                patientPerson.insert(patientPerson.index(NewFatherRelative),relative)
+                patientPerson.remove(NewFatherRelative)
+
+            elif(str(id) == str(newPatientMotherID)):
+                motherFound = False
+                fatherFound = False
+
+                relative.find(".//code").set('code', "NFTH")
+                relationshipHolder.find('id').set('extension', "2")
+                for x in relationshipHolder.findall(".//relative"):
+                    if(x.find('code').get('code') == "NMTH"):
+                        motherFound = True
+                        relationshipHolderNew = x.find('relationshipHolder')
+                        relationshipHolderNew.find('id').set('extension', "4")
+                    elif(x.find('code').get('code') == "NFTH"):
+                        fatherFound = True
+                        fatherRelative = x
+                        relationshipHolderNew = x.find('relationshipHolder')
+                        relationshipHolderNew.find('id').set('extension', "5")
+                
+                # If they do not currently have a mother, add one
+                if(motherFound != True):
+                    relativeNew = ET.Element('relative', classCode="PRS")
+                    ET.SubElement(relativeNew, 'code', code="NMTH")
+                    relationshipHolderNew = ET.SubElement(relativeNew, 'relationshipHolder', classCode="PSN", determinerCode="INSTANCE")
+                    ET.SubElement(relationshipHolderNew, 'id', extension="4")
+                    if(fatherFound):
                         relationshipHolder.insert(relationshipHolder.index(fatherRelative), relativeNew)
                     else:
                         relationshipHolder.append(relativeNew)
                 # If they do not currently have a father, add one
-                if(spouseFatherFound != True):
+                if(fatherFound != True):
                     relativeNew = ET.SubElement(relationshipHolder, 'relative', classCode="PRS")
                     ET.SubElement(relativeNew, 'code', code="NFTH")
                     relationshipHolderNew = ET.SubElement(relativeNew, 'relationshipHolder', classCode="PSN", determinerCode="INSTANCE")
-                    if(originalPatientID == 2): # make sure spouse parent ids are correct
-                        ET.SubElement(relationshipHolderNew, 'id', extension="7")
-                    else:
-                        ET.SubElement(relationshipHolderNew, 'id', extension="5")
-            
-            patientPerson.append(relative)
+                    ET.SubElement(relationshipHolderNew, 'id', extension="5")
 
-        ## The great-grandparents will be the same side of the family 
-        ## All of them either Paternal or Maternal NO COMBINATION
-        # Paternal Grandfather -> Great-Grandfather (Paternal or Maternal TBD)
-        elif((str)(relative.find('code').get('code'))== "PGRFTH"):
-            if(originalPatientID == 2): # determine wether paternal or maternal
-                relative.find(".//code").set('code', "MGGRFTH")
-                relationshipHolder = relative.find(".//relationshipHolder")
-                relationshipHolder.find(".//id").set('extension', str(currentId)) # update from paternal grandpa id to maternal great grandpa id
-                currentId += 1
-            else:
-                relative.find(".//code").set('code', "PGGRFTH")
-                relationshipHolder = relative.find(".//relationshipHolder")
-                relationshipHolder.find(".//id").set('extension', str(currentId)) # update from paternal grandpa id to paternal great grandpa id
-                currentId += 1
+                patientPerson.insert(patientPerson.index(NewMotherRelative),relative)
+                patientPerson.remove(NewMotherRelative)
 
-            patientPerson.append(relative)
+            else: 
+                for x in relationshipHolder.findall(".//relative"):
+                    # Check if the "NotAvailable" relative's mother is on the maternal side
+                    # If their mother falls in one of the first 7 ids, update accordingly
+                    if(x.find('code').get('code') == "NMTH"):
+                        relationshipHolderNew = x.find('relationshipHolder')
+                        motherID = relationshipHolderNew.find('id').get('extension')
+                        globalVars.notAvailableIdsToAdd.append(motherID)
+                        if int(motherID) <= 7 or int(motherID) == int(BeforePatientID):
+                            if int(motherID) == 1:
+                                relationshipHolderNew.find('id').set('extension', str(originalPatientID))
+                            if int(motherID) == 2:
+                                if(sideOfFamily == "M"):
+                                    relationshipHolderNew.find('id').set('extension', "4")
+                                else:
+                                    relationshipHolderNew.find('id').set('extension', "6")
+                            if int(motherID) == 4:
+                                relationshipHolderNew.find('id').set('extension', str(mgrmthCode))  
+                            if int(motherID) == 6:
+                                relationshipHolderNew.find('id').set('extension', str(pgrmthCode))  
+                            if int(motherID) == int(BeforePatientID):
+                                relationshipHolderNew.find('id').set('extension', "1")  
+                    # Check if the "NotAvailable" relative's father is on the maternal side
+                    # If their father falls in one of the first 7 ids, update accordingly
+                    elif(x.find('code').get('code') == "NFTH"):
+                        relationshipHolderNew = x.find('relationshipHolder')
+                        fatherID = relationshipHolderNew.find('id').get('extension')
+                        globalVars.notAvailableIdsToAdd.append(fatherID)
+                        if int(fatherID) <= 7 or int(fatherID) == int(BeforePatientID):
+                            if int(fatherID) == 1:
+                                relationshipHolderNew.find('id').set('extension', str(originalPatientID))
+                            if int(fatherID) == 3:
+                                if(sideOfFamily == "M"):
+                                    relationshipHolderNew.find('id').set('extension', "5")
+                                else:
+                                    relationshipHolderNew.find('id').set('extension', "7")
+                            if int(fatherID) == 5:
+                                relationshipHolderNew.find('id').set('extension', str(mgrfthCode)) 
+                            if int(fatherID) == 7:
+                                relationshipHolderNew.find('id').set('extension', str(pgrfthCode)) 
+                            if int(fatherID) == int(BeforePatientID):
+                                relationshipHolderNew.find('id').set('extension', "1")  
 
-        # Paternal Grandmother -> Great-Grandmother (Paternal or Maternal TBD)
-        elif((str)(relative.find('code').get('code'))== "PGRMTH"):
-            if(originalPatientID == 2): # determine wether paternal or maternal
-                relative.find(".//code").set('code', "MGGRMTH")
-                relationshipHolder = relative.find(".//relationshipHolder")
-                relationshipHolder.find(".//id").set('extension', str(currentId)) # update from paternal grandma id to maternal great grandma id
-                currentId += 1
-            else:
-                relative.find(".//code").set('code', "PGGRMTH")
-                relationshipHolder = relative.find(".//relationshipHolder")
-                relationshipHolder.find(".//id").set('extension', str(currentId)) # update from paternal grandma id to paternal great grandma id
-                currentId += 1
-
-            patientPerson.append(relative)
-
-        # Maternal Grandfather -> Great-Grandfather (Paternal or Maternal TBD)
-        elif((str)(relative.find('code').get('code'))== "MGRFTH"):
-            if(originalPatientID == 2): # determine wether paternal or maternal
-                relative.find(".//code").set('code', "MGGRFTH")
-                relationshipHolder = relative.find(".//relationshipHolder")
-                relationshipHolder.find(".//id").set('extension', str(currentId)) # update from maternal grandpa id to maternal great grandpa id
-                currentId += 1
-            else:
-                relative.find(".//code").set('code', "PGGRFTH")
-                relationshipHolder = relative.find(".//relationshipHolder")
-                relationshipHolder.find(".//id").set('extension', str(currentId)) # update from maternal grandpa id to paternal great grandpa id
-                currentId += 1
-
-            patientPerson.append(relative)
-
-        # Maternal Grandmother -> Great-Grandmother (Paternal or Maternal TBD)
-        elif((str)(relative.find('code').get('code'))== "MGRMTH"):
-            if(originalPatientID == 2): # determine wether paternal or maternal
-                relative.find(".//code").set('code', "MGGRMTH")
-                relationshipHolder = relative.find(".//relationshipHolder")
-                relationshipHolder.find(".//id").set('extension', str(currentId)) # update from maternal grandma id to maternal great grandma id
-                currentId += 1
-            else:
-                relative.find(".//code").set('code', "PGGRMTH")
-                relationshipHolder = relative.find(".//relationshipHolder")
-                relationshipHolder.find(".//id").set('extension', str(currentId)) # update from maternal grandma id to paternal great grandma id
-                currentId += 1
-
-            patientPerson.append(relative)
-
-        # Paternal Aunt -> "NotAvailable"
-        elif((str)(relative.find('code').get('code'))== "PAUNT"):
-            relative.find(".//code").set('code', "NotAvailable") # Update to "NotAvailable"code
-            patientPerson.append(relative)
-
-        # Paternal Uncle -> "NotAvailable"
-        elif((str)(relative.find('code').get('code'))== "PUNCLE"):
-            relative.find(".//code").set('code', "NotAvailable") # Update to "NotAvailable"code
-            patientPerson.append(relative)
-
-        # Maternal Aunt -> "NotAvailable"
-        elif((str)(relative.find('code').get('code'))== "MAUNT"):
-            relative.find(".//code").set('code', "NotAvailable") # Update to "NotAvailable"code
-            patientPerson.append(relative)
-
-        # Maternal Uncle -> "NotAvailable"
-        elif((str)(relative.find('code').get('code'))== "MUNCLE"):
-            relative.find(".//code").set('code', "NotAvailable") # Update to "NotAvailable"code
-            patientPerson.append(relative)
-
-        # Grandchildren -> (niece/nephew) OR (son/daughter)
-        # if the daughter is the new patient then change ID
-        elif((str)(relative.find('code').get('code'))== "GRNDDAU"):
-            #change to niece NOW and correct later if mother is new patient
-            relative.find(".//code").set('code', "NIECE")
-            relationshipHolder = relative.find(".//relationshipHolder")
-            
-            #it is rearrange_daughter so if grandchild mother is the new patient, change ID
-            for x in relationshipHolder.findall(".//relative"):
-                if(x.find('code').get('code') == "NMTH"):
-                    relationshipHolderNew = x.find('relationshipHolder')
-                    motherID = relationshipHolderNew.find('id').get('extension')
-                    if(motherID == BeforePatientID): # change id of mother to patientID if her id matches BeforePatientID
-                        relationshipHolderNew.find('id').set('extension', "1")
-                        # if the mother is the patient then switch from NIECE to DAU
-                        relative.find(".//code").set('code', "DAU")
-            
-            patientPerson.append(relative)
-
-        elif((str)(relative.find('code').get('code'))== "GRNDSON"):
-            #change to nephew NOW and correct later if mother is new patient
-            relative.find(".//code").set('code', "NEPHEW")
-            relationshipHolder = relative.find(".//relationshipHolder")
-
-            #it is rearrange_daughter so if grandchild mother is the new patient, change ID
-            for x in relationshipHolder.findall(".//relative"):
-                if(x.find('code').get('code') == "NMTH"):
-                    relationshipHolderNew = x.find('relationshipHolder')
-                    motherID = relationshipHolderNew.find('id').get('extension')
-                    if(motherID == BeforePatientID): # change id of mother to patientID if her id matches BeforePatientID
-                        relationshipHolderNew.find('id').set('extension', "1")
-                        # if the mother is the patient then switch from NEPHEW to SON
-                        relative.find(".//code").set('code', "SON")
-            
-            patientPerson.append(relative)
-
-        # Niece -> Cousin (Paternal or Maternal TBD)
-        elif((str)(relative.find('code').get('code'))== "NIECE"):
-            if(originalPatientID == 2):
-                relative.find(".//code").set('code', "MCOUSN") # Update to Maternal cousin code
-            else:
-                relative.find(".//code").set('code', "PCOUSN") # Update to Paternal cousin code
-            patientPerson.append(relative)
-
-        # Nephew -> Cousin (Paternal or Maternal TBD)
-        elif((str)(relative.find('code').get('code'))== "NEPHEW"):
-            if(originalPatientID == 2):
-                relative.find(".//code").set('code', "MCOUSN") # Update to Maternal cousin code
-            else:
-                relative.find(".//code").set('code', "PCOUSN") # Update to Paternal cousin code
-            patientPerson.append(relative)
-
-        # Paternal Cousin -> "NotAvailable"
-        elif((str)(relative.find('code').get('code'))== "PCOUSN"):
-            relative.find(".//code").set('code', "NotAvailable") # Update to "NotAvailable" code
-            patientPerson.append(relative)
-
-        # Maternal Cousin -> "NotAvailable"
-        elif((str)(relative.find('code').get('code'))== "MCOUSN"):
-            relative.find(".//code").set('code', "NotAvailable") # Update to "NotAvailable" code
-            patientPerson.append(relative)
-
-        # Cousin -> "NotAvailable"
-        elif((str)(relative.find('code').get('code'))== "COUSN"):
-            relative.find(".//code").set('code', "NotAvailable") # Update to "NotAvailable" code
-            patientPerson.append(relative)
-
+                globalVars.notAvailableIdsToAdd.append(id)
         else:
             patientPerson.append(relative)
+    
+    # Next, we will look at all of the relatives containing the "NotAvailable" code
+    # These relatives will only be added if their ID is on the notAvailableIdsToAdd list
+    # Note that their might be more IDs on this list than NotAvailable relatives to add.
+    # This is because we do not validate if the ID is linked to a NotAvailable relative before it is added,
+    # rather, it is a potential list of IDs that should be added if they are NotAvailable.
+    # However, since we are only going through relatives that are NotAvailable and have not been added yet,
+    # we will not have to worry about duplicating other relatives.
+    for x in range(0, len(globalVars.notAvailableRelatives)):
+        relative = globalVars.notAvailableRelatives[x]
+        # print(relative.find('code').get('code'))
+        if((str)(relative.find('code').get('code'))== "NotAvailable"):
+            relationshipHolder = relative.find(".//relationshipHolder")
+            id = relationshipHolder.find('id').get('extension')
+            if(id in globalVars.notAvailableIdsToAdd):
+                patientPerson.append(relative)
 
-    # Create new grandparents. Only the Paternal or Maternal Grandparents set will get added depending on the og Patient's gender
-    MGRMTHRelative = ET.SubElement(patientPerson, 'relative', classCode="PRS")
-    ET.SubElement(MGRMTHRelative, 'code', code="MGRMTH")
-    relationshipHolderNew = ET.SubElement(MGRMTHRelative, 'relationshipHolder', classCode="PSN", determinerCode="INSTANCE")
-    ET.SubElement(relationshipHolderNew, 'id', extension="4")
-    ET.SubElement(relationshipHolderNew, 'administrativeGenderCode', code="F")
-    ET.SubElement(relationshipHolderNew, 'deceasedInd', value = "false")
+    # Finally, we will add the original patient's relative that was created earlier and the og grandparents who are now unavailable
+    patientPerson.append(ogmgrmth)
+    patientPerson.append(ogmgrfth)
+    patientPerson.append(ogpgrmth)
+    patientPerson.append(ogpgrfth)
 
-    MGRFTHRelative = ET.SubElement(patientPerson, 'relative', classCode="PRS")
-    ET.SubElement(MGRFTHRelative, 'code', code="MGRFTH")
-    relationshipHolderNew = ET.SubElement(MGRFTHRelative, 'relationshipHolder', classCode="PSN", determinerCode="INSTANCE")
-    ET.SubElement(relationshipHolderNew, 'id', extension="5")
-    ET.SubElement(relationshipHolderNew, 'administrativeGenderCode', code="M")
-    ET.SubElement(relationshipHolderNew, 'deceasedInd', value = "false")
-
-    PGRMTHRelative = ET.SubElement(patientPerson, 'relative', classCode="PRS")
-    ET.SubElement(PGRMTHRelative, 'code', code="PGRMTH")
-    relationshipHolderNew = ET.SubElement(PGRMTHRelative, 'relationshipHolder', classCode="PSN", determinerCode="INSTANCE")
-    ET.SubElement(relationshipHolderNew, 'id', extension="6")
-    ET.SubElement(relationshipHolderNew, 'administrativeGenderCode', code="F")
-    ET.SubElement(relationshipHolderNew, 'deceasedInd', value = "false")
-
-    PGRFTHRelative = ET.SubElement(patientPerson, 'relative', classCode="PRS")
-    ET.SubElement(PGRFTHRelative, 'code', code="PGRFTH")
-    relationshipHolderNew = ET.SubElement(PGRFTHRelative, 'relationshipHolder', classCode="PSN", determinerCode="INSTANCE")
-    ET.SubElement(relationshipHolderNew, 'id', extension="7")
-    ET.SubElement(relationshipHolderNew, 'administrativeGenderCode', code="M")
-    ET.SubElement(relationshipHolderNew, 'deceasedInd', value = "false")
-
-    # add the old patient as the sibling they now are to the new patient
-    if(originalPatientID == 2):
-        patientPerson.append(PGRFTHRelative)
-        patientPerson.append(PGRMTHRelative)
-    else:
-        patientPerson.append(MGRFTHRelative)
-        patientPerson.append(MGRMTHRelative)
-    patientPerson.append(originalPatient)
+newPatientMotherID = 0
+newPatientFatherID = 0
