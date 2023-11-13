@@ -423,6 +423,12 @@ def reorient_file(first_name,last_name, dob, mrn, idx, tree):
         rearrange_mcousin.rearrange(tree, patientPerson, globalVars.ids[idx])
     if(str(globalVars.codes[idx]) == "PCOUSN"):
         rearrange_pcousin.rearrange(tree, patientPerson, globalVars.ids[idx])
+    # niece
+    if(str(globalVars.codes[idx]) == "NIECE"):
+        rearrange_mcousin.rearrange(tree, patientPerson, globalVars.ids[idx])
+    # nephew
+    if(str(globalVars.codes[idx]) == "NEPHEW"):
+        rearrange_pcousin.rearrange(tree, patientPerson, globalVars.ids[idx])
 
     for data in globalVars.newPatientSubjectOf1:
         patient.append(data)
