@@ -342,6 +342,7 @@ def reorient_file(first_name,last_name, dob, mrn, idx, tree):
     # print(first_name, last_name, dob, mrn)
     ext = str(int(tree.find('.id').get("extension")) + 1)
     clinicName = tree.find(".//text").text
+    ExistingRoot = str(tree.find('.id').get("root"))
     today = date.today()
     effective_time = today.strftime("%Y%m%d")
     today = today.strftime("%Y-%m-%d")
@@ -351,13 +352,13 @@ def reorient_file(first_name,last_name, dob, mrn, idx, tree):
 
     # Add info
     root = ET.Element('FamilyHistory', classCode="OBS", moodCode="EVN")
-    ET.SubElement(root, 'id', root="2.16.840.1.113883.6.117", extension=ext, assigningAuthorityName="HRA" )
+    ET.SubElement(root, 'id', root= ExistingRoot, extension=ext, assigningAuthorityName="HRA" )
     ET.SubElement(root, 'code', code="10157-6",codeSystemName="LOINC", displayName="HISTORY OF FAMILY MEMBER DISEASE")
     ET.SubElement(root, 'text').text = clinicName
     ET.SubElement(root, 'effectiveTime', value=effective_time)
     subject = ET.SubElement(root, 'subject', typeCode="SBJ")
     patient = ET.SubElement(subject, 'patient', classCode="PAT")
-    ET.SubElement(patient, 'id', root="2.16.840.1.113883.6.117", extension=mrn)
+    ET.SubElement(patient, 'id', root=ExistingRoot, extension=mrn)
     patientPerson = ET.SubElement(patient, 'patientPerson', classCode="PSN", determinerCode="INSTANCE")
     ET.SubElement(patientPerson, 'id', extension="1")
     name = ET.SubElement(patientPerson, 'name')
