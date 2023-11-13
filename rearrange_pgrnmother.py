@@ -55,8 +55,8 @@ def makeRelativeForOldPatient(originalPatient, fatherId, motherId, currentId):
     # 6 - Paternal Grandmother
     # 7 - Paternal Grandfather
 def rearrange(tree, patientPerson):
-    currentId = 100 # Any new relatives to be added will start with the ID of 100
-    grandfatherId = 99
+    grandfatherId = (int)(max(globalVars.ids)) + 1
+    currentId = (int)(max(globalVars.ids)) + 2 # Any new relatives to be added will start with the next available ID
 
     # The first 6 members of the family will be dealt with first.
     # This includes the mother, father, paternal grandmother, and paternal grandfather
