@@ -104,11 +104,12 @@ def rearrange(tree, patientPerson, BeforePatientID):
     global newPatientMotherID
     sideOfFamily = determineFamilySide(BeforePatientID)
 
-    currentId = 100 # Any new relatives to be added will start with the ID of 100
-    mgrmthCode = 99
-    mgrfthCode = 98
-    pgrmthCode = 97
-    pgrfthCode = 96
+    mgrmthCode = (int)(globalVars.currentMaxId) + 1
+    mgrfthCode = (int)(globalVars.currentMaxId) + 2
+    pgrmthCode = (int)(globalVars.currentMaxId) + 3
+    pgrfthCode = (int)(globalVars.currentMaxId) + 4
+    # Any new relatives to be added will start with lowest unused id
+    currentId = (int)(globalVars.currentMaxId) + 5
 
     # variables to find the spouse's ID
     spouseIDfound = False

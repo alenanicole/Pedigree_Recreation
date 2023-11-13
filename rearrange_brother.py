@@ -56,7 +56,9 @@ def makeRelativeForOldPatient(originalPatient, currentId):
     # 6 - Paternal Grandmother
     # 7 - Paternal Grandfather
 def rearrange(tree, patientPerson, BeforePatientID):
-    currentId = 100 # Any new relatives to be added will start with the ID of 100
+    currentMaxId = (int)(max(globalVars.ids))
+    # Any new relatives to be added will start with lowest unused id
+    currentId = (int)(globalVars.currentMaxId) + 1
 
     # Create a new relative element for the original patient
     originalPatient = ET.Element('relative', classCode = "PRS")
