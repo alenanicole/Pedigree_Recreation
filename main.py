@@ -528,7 +528,7 @@ def change_to_download(tree, filename):
     button = ct.CTkButton(master=download, text="Restart", command=reset)
     button.grid(row=1, column=0, padx=20, pady=10)
 
-    button = ct.CTkButton(master=download, text="Quit", command=quit)
+    button = ct.CTkButton(master=download, text="Quit", command=app.destroy)
     button.grid(row = 2, column=0, padx=20, pady=10)
     add_patient_info.grid_forget()
     choose_patient.grid_forget()
