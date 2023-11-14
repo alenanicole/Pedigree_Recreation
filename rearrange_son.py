@@ -104,12 +104,12 @@ def rearrange(tree, patientPerson, BeforePatientID):
     global newPatientMotherID
     sideOfFamily = determineFamilySide(BeforePatientID)
 
-    mgrmthCode = (int)(globalVars.currentMaxId) + 1
-    mgrfthCode = (int)(globalVars.currentMaxId) + 2
-    pgrmthCode = (int)(globalVars.currentMaxId) + 3
-    pgrfthCode = (int)(globalVars.currentMaxId) + 4
+    mgrmthCode = (int)(globalVars.currentMaxID) + 1
+    mgrfthCode = (int)(globalVars.currentMaxID) + 2
+    pgrmthCode = (int)(globalVars.currentMaxID) + 3
+    pgrfthCode = (int)(globalVars.currentMaxID) + 4
     # Any new relatives to be added will start with lowest unused id
-    currentId = (int)(globalVars.currentMaxId) + 5
+    currentId = (int)(globalVars.currentMaxID) + 5
 
     # variables to find the spouse's ID
     spouseIDfound = False
@@ -461,23 +461,6 @@ def rearrange(tree, patientPerson, BeforePatientID):
 
             patientPerson.append(relative)
 
-        # Cousin -> "NotAvailable"
-        elif((str)(relative.find('code').get('code'))== "COUSN"):
-            relative.find(".//code").set('code', "NotAvailable") # Update to "NotAvailable" code
-            
-            # add parents to NotAvailable array
-            for x in relationshipHolder.findall(".//relative"):
-                if(x.find('code').get('code') == "NMTH"):
-                    relationshipHolderNew = x.find('relationshipHolder')
-                    motherID = relationshipHolderNew.find('id').get('extension')
-                    globalVars.notAvailableIdsToAdd.append(motherID)
-                elif(x.find('code').get('code') == "NFTH"):
-                    relationshipHolderNew = x.find('relationshipHolder')
-                    fatherID = relationshipHolderNew.find('id').get('extension')
-                    globalVars.notAvailableIdsToAdd.append(fatherID)
-
-            patientPerson.append(relative)
-
         # Daughter -> Sister
         elif((str)(relative.find('code').get('code'))== "DAU"):
             relative.find(".//code").set('code', "NSIS")
@@ -488,14 +471,14 @@ def rearrange(tree, patientPerson, BeforePatientID):
                 if(x.find('code').get('code') == "NMTH"):
                     relationshipHolderNew = x.find('relationshipHolder')
                     tempID = relationshipHolderNew.find('id').get('extension')
-                    if(~spouseIDfound & tempID != "1"): #if the mother isn't the patient then get ID
+                    if(~spouseIDfound and (int)(tempID) != 1): #if the mother isn't the patient then get ID
                         spouseID = tempID
                         spouseIDfound = True
                     relationshipHolderNew.find('id').set('extension', "2")
                 elif(x.find('code').get('code') == "NFTH"):
                     relationshipHolderNew = x.find('relationshipHolder')
                     tempID = relationshipHolderNew.find('id').get('extension')
-                    if(~spouseIDfound & tempID != "1"): #if the mother isn't the patient then get ID
+                    if(~spouseIDfound and (int)(tempID) != 1): #if the mother isn't the patient then get ID
                         spouseID = tempID
                         spouseIDfound = True
                     relationshipHolderNew.find('id').set('extension', "3")
@@ -525,14 +508,14 @@ def rearrange(tree, patientPerson, BeforePatientID):
                 if(x.find('code').get('code') == "NMTH"):
                     relationshipHolderNew = x.find('relationshipHolder')
                     tempID = relationshipHolderNew.find('id').get('extension')
-                    if(~spouseIDfound & tempID != "1"): #if the mother isn't the patient then get ID
+                    if(~spouseIDfound and (int)(tempID) != 1): #if the mother isn't the patient then get ID
                         spouseID = tempID
                         spouseIDfound = True
                     relationshipHolderNew.find('id').set('extension', "2")
                 elif(x.find('code').get('code') == "NFTH"):
                     relationshipHolderNew = x.find('relationshipHolder')
                     tempID = relationshipHolderNew.find('id').get('extension')
-                    if(~spouseIDfound & tempID != "1"): #if the father isn't the patient then get ID
+                    if(~spouseIDfound and (int)(tempID) != 1): #if the father isn't the patient then get ID
                         spouseID = tempID
                         spouseIDfound = True
                     relationshipHolderNew.find('id').set('extension', "3")
@@ -655,7 +638,7 @@ def rearrange(tree, patientPerson, BeforePatientID):
                 motherFound = False
                 fatherFound = False
 
-                relative.find(".//code").set('code', "NFTH")
+                relative.find(".//code").set('code', "NMTH")
                 relationshipHolder.find('id').set('extension', "2")
                 for x in relationshipHolder.findall(".//relative"):
                     if(x.find('code').get('code') == "NMTH"):
@@ -756,6 +739,7 @@ def rearrange(tree, patientPerson, BeforePatientID):
     patientPerson.append(ogmgrfth)
     patientPerson.append(ogpgrmth)
     patientPerson.append(ogpgrfth)
+    patientPerson.append(originalPatient)
 
 newPatientMotherID = 0
 newPatientFatherID = 0

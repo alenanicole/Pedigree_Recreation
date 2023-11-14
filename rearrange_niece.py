@@ -101,13 +101,13 @@ def rearrange(tree, patientPerson, BeforePatientID):
     global newPatientMotherID
     sideOfFamily = determineFamilySide(BeforePatientID)
 
-    mgrmthCode = (int)(globalVars.currentMaxId) + 1
-    mgrfthCode = (int)(globalVars.currentMaxId) + 2
-    pgrmthCode = (int)(globalVars.currentMaxId) + 3
-    pgrfthCode = (int)(globalVars.currentMaxId) + 4
-    oldPatientNewID = (int)(globalVars.currentMaxId) + 5
+    mgrmthCode = (int)(globalVars.currentMaxID) + 1
+    mgrfthCode = (int)(globalVars.currentMaxID) + 2
+    pgrmthCode = (int)(globalVars.currentMaxID) + 3
+    pgrfthCode = (int)(globalVars.currentMaxID) + 4
+    oldPatientNewID = (int)(globalVars.currentMaxID) + 5
     # Any new relatives to be added will start with lowest unused id
-    currentId = (int)(globalVars.currentMaxId) + 6
+    currentId = (int)(globalVars.currentMaxID) + 6
 
     # variables to find the spouse's ID
     spouseIDfound = False
@@ -283,8 +283,8 @@ def rearrange(tree, patientPerson, BeforePatientID):
             if(id == newPatientMotherID):
                 relative.find(".//code").set('code', "NMTH")
                 relationshipHolder.find('id').set('extension', "2")
-                patientPerson.insert(patientPerson.index(),relative)
-                patientPerson.remove()
+                patientPerson.insert(patientPerson.index(NewMotherRelative),relative)
+                patientPerson.remove(NewMotherRelative)
             else:
                 relative.find(".//code").set('code', ((str)(sideOfFamily) + "AUNT")) # auto makes aunt paternal or maternal
 
@@ -309,15 +309,6 @@ def rearrange(tree, patientPerson, BeforePatientID):
             relationshipHolder = relative.find(".//relationshipHolder")
             id = relationshipHolder.find('id').get('extension')
 
-            # id matches new patient's father then change
-            if(id == newPatientFatherID):
-                relative.find(".//code").set('code', "NFTH")
-                relationshipHolder.find('id').set('extension', "3")
-                patientPerson.insert(patientPerson.index(),relative)
-                patientPerson.remove()
-            else:
-                relative.find(".//code").set('code', ((str)(sideOfFamily) + "UNCLE")) # auto makes uncle paternal or maternal
-
             # Fix the parent ids from their current #2 and #3 to #4-7
             for x in relationshipHolder.findall(".//relative"):
                 if(x.find('code').get('code') == "NMTH"): # update NMTH to the correct grandmotherID
@@ -332,7 +323,16 @@ def rearrange(tree, patientPerson, BeforePatientID):
                         relationshipHolderNew.find('id').set('extension', "5")
                     else: 
                         relationshipHolderNew.find('id').set('extension', "7")
-            patientPerson.append(relative)
+            
+            # id matches new patient's father then change
+            if(id == newPatientFatherID):
+                relative.find(".//code").set('code', "NFTH")
+                relationshipHolder.find('id').set('extension', "3")
+                patientPerson.insert(patientPerson.index(NewFatherRelative),relative)
+                patientPerson.remove(NewFatherRelative)
+            else:
+                relative.find(".//code").set('code', ((str)(sideOfFamily) + "UNCLE")) # auto makes uncle paternal or maternal
+                patientPerson.append(relative)
         
         # Maternal Aunt -> "NotAvailable"
         elif((str)(relative.find('code').get('code'))== "MAUNT"):
@@ -488,23 +488,6 @@ def rearrange(tree, patientPerson, BeforePatientID):
                     globalVars.notAvailableIdsToAdd.append(fatherID)
 
             patientPerson.append(relative)
-
-        # Cousin -> "NotAvailable"
-        elif((str)(relative.find('code').get('code'))== "COUSN"):
-            relative.find(".//code").set('code', "NotAvailable") # Update to "NotAvailable" code
-            
-            # add parents to NotAvailable array
-            for x in relationshipHolder.findall(".//relative"):
-                if(x.find('code').get('code') == "NMTH"):
-                    relationshipHolderNew = x.find('relationshipHolder')
-                    motherID = relationshipHolderNew.find('id').get('extension')
-                    globalVars.notAvailableIdsToAdd.append(motherID)
-                elif(x.find('code').get('code') == "NFTH"):
-                    relationshipHolderNew = x.find('relationshipHolder')
-                    fatherID = relationshipHolderNew.find('id').get('extension')
-                    globalVars.notAvailableIdsToAdd.append(fatherID)
-
-            patientPerson.append(relative)
         
         # Daughter -> Cousin (Maternal / Paternal)
         elif((str)(relative.find('code').get('code'))== "DAU"):
@@ -634,7 +617,7 @@ def rearrange(tree, patientPerson, BeforePatientID):
                 motherFound = False
                 fatherFound = False
 
-                relative.find(".//code").set('code', "NFTH")
+                relative.find(".//code").set('code', "NMTH")
                 relationshipHolder.find('id').set('extension', "2")
                 for x in relationshipHolder.findall(".//relative"):
                     if(x.find('code').get('code') == "NMTH"):
@@ -735,6 +718,7 @@ def rearrange(tree, patientPerson, BeforePatientID):
     patientPerson.append(ogmgrfth)
     patientPerson.append(ogpgrmth)
     patientPerson.append(ogpgrfth)
+    patientPerson.append(originalPatient)
 
 newPatientMotherID = 0
 newPatientFatherID = 0

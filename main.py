@@ -23,6 +23,8 @@ import rearrange_mgrnfather
 import rearrange_grandchild
 import rearrange_mcousin
 import rearrange_pcousin
+import rearrange_niece
+import rearrange_nephew
 
 class Frame(ct.CTkFrame):
     def __init__(self, master, **kwargs):
@@ -77,7 +79,7 @@ def switchCode(code):
     elif code == "PUNCLE":
         return "Paternal Uncle -- "
     elif code == "NIECE":
-        return "Neice -- "
+        return "Niece -- "
     elif code == "NEPHEW":
         return "Nephew --"
     elif code == "PCOUSN":
@@ -434,10 +436,10 @@ def reorient_file(first_name,last_name, dob, mrn, idx, tree):
         rearrange_pcousin.rearrange(tree, patientPerson, globalVars.ids[idx])
     # niece
     if(str(globalVars.codes[idx]) == "NIECE"):
-        rearrange_mcousin.rearrange(tree, patientPerson, globalVars.ids[idx])
+        rearrange_niece.rearrange(tree, patientPerson, globalVars.ids[idx])
     # nephew
     if(str(globalVars.codes[idx]) == "NEPHEW"):
-        rearrange_pcousin.rearrange(tree, patientPerson, globalVars.ids[idx])
+        rearrange_nephew.rearrange(tree, patientPerson, globalVars.ids[idx])
 
     for data in globalVars.newPatientSubjectOf1:
         patient.append(data)
