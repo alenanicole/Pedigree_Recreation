@@ -39,7 +39,7 @@ class ScrollableFrame(ct.CTkScrollableFrame):
 def create_app():
         app = ct.CTk()
         ct.set_appearance_mode("auto") 
-        app.title("Pedigree Recreation")
+        app.title("HL7 Reorientation Program")
         app.geometry("800x600")
         app.grid_rowconfigure(0, weight=1)
         app.grid_columnconfigure(0, weight=1)
