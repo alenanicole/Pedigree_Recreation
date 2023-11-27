@@ -1,6 +1,6 @@
 from lxml import etree as ET
 import customtkinter as ct
-from tkinter import filedialog
+from tkinter import filedialog, font
 from datetime import *
 import time
 import os
@@ -38,11 +38,16 @@ class ScrollableFrame(ct.CTkScrollableFrame):
 
 def create_app():
         app = ct.CTk()
-        ct.set_appearance_mode("dark") 
+        ct.set_appearance_mode("auto") 
         app.title("Pedigree Recreation")
-        app.geometry("600x400")
+        app.geometry("800x600")
         app.grid_rowconfigure(0, weight=1)
         app.grid_columnconfigure(0, weight=1)
+        app.resizable(False, False)
+        label1 = ct.CTkLabel(master=app, text="Lead Developer: Alena Durel, Charleston Southern University Student (Spring 2024 Grad)")
+        label1.place(x=10, y=550)
+        label2 = ct.CTkLabel(master=app, text="Assistant Developer: Riley Osborne, Charleston Southern University Student (Fall 2024 Grad)")
+        label2.place(x=10, y=570)
         return app
 
 def switchCode(code):
@@ -295,9 +300,14 @@ def output_family(tree):
     change_to_choose_patient()
     label1 = ct.CTkLabel(master=choose_patient, text="Additional Relatives with Insufficient Data for Reorientation:")
     label2 = ct.CTkLabel(master=choose_patient, text="------------------------------------------------------------------------------------")
+        
+    instructions1 = ct.CTkLabel(master=choose_patient, text="Select one of the relatives below as the new patient", font=(default_font, 20))
+    instructions1.grid(row=0, column=0, padx=20, pady=(10, 0), sticky="ew")
+    instructions2 = ct.CTkLabel(master=choose_patient, text="and click the 'Choose Patient' button", font=(default_font, 20))
+    instructions2.grid(row=1, column=0, padx=20, pady=(10, 0), sticky="ew")
 
-    radio_var = ct.IntVar(value=0)
-    i = 0
+    radio_var = ct.IntVar(value=2)
+    i = 2
     for relativeData in globalVars.relatives:
         radioButton = ct.CTkRadioButton(master=choose_patient, text=relativeData, variable=radio_var, value = i)
         radioButton.grid(row=i, column=0, padx=20, pady=(10, 0), sticky="ew")
@@ -320,32 +330,38 @@ def output_family(tree):
 
 def add_data(idx, tree):
     change_to_add_patient()
+
+    instructions1 = ct.CTkLabel(master=add_patient_info, text="Fill in the required data for the new patient below", font=(default_font, 20))
+    instructions1.grid(row=0, column = 1, padx=20, pady=(10, 0), sticky="w")
+    instructions2 = ct.CTkLabel(master=add_patient_info, text="and click the 'Submit' button", font=(default_font, 20))
+    instructions2.grid(row=1, column = 1, padx=20, pady=(10, 0), sticky="w")
+
     first_name = ct.StringVar()
     last_name = ct.StringVar()
     dob = ct.StringVar()
     mrn = ct.StringVar()
     new_patient_label = ct.CTkLabel(master=add_patient_info, text = "New patient: " + globalVars.relatives[idx])
-    new_patient_label.grid(row=0, column=1, padx=20, pady=(10, 0), sticky="w")
+    new_patient_label.grid(row=2, column=1, padx=20, pady=(10, 0), sticky="w")
     first_name_label = ct.CTkLabel(master=add_patient_info, text = "First Name")
-    first_name_label.grid(row = 1, column = 0, padx=20, pady=(10, 0), sticky="w")
+    first_name_label.grid(row = 3, column = 0, padx=20, pady=(10, 0), sticky="w")
     last_name_label = ct.CTkLabel(master=add_patient_info, text = "Last Name")
-    last_name_label.grid(row = 2, column = 0, padx=20, pady=(10, 0), sticky="w")
+    last_name_label.grid(row = 4, column = 0, padx=20, pady=(10, 0), sticky="w")
     dob_label = ct.CTkLabel(master=add_patient_info, text = "Date of Birth (YYYYMMDD)")
-    dob_label.grid(row = 3, column = 0, padx=20, pady=(10, 0), sticky="w")
+    dob_label.grid(row = 5, column = 0, padx=20, pady=(10, 0), sticky="w")
     mrn_label =  ct.CTkLabel(master=add_patient_info, text = "Medical Record Number")
-    mrn_label.grid(row = 4, column = 0, padx=20, pady=(10, 0), sticky="w")
+    mrn_label.grid(row = 6, column = 0, padx=20, pady=(10, 0), sticky="w")
     first_name_entry = ct.CTkEntry(master=add_patient_info, textvariable=first_name)
-    first_name_entry.grid(row = 1, column = 1, padx=20, pady=(10, 0), sticky="nsew")
+    first_name_entry.grid(row = 3, column = 1, padx=20, pady=(10, 0), sticky="nsew")
     last_name_entry = ct.CTkEntry(master=add_patient_info, textvariable=last_name)
-    last_name_entry.grid(row = 2, column = 1, padx=20, pady=(10, 0), sticky="nsew")
+    last_name_entry.grid(row = 4, column = 1, padx=20, pady=(10, 0), sticky="nsew")
     dob_entry = ct.CTkEntry(master=add_patient_info, textvariable=dob)
-    dob_entry.grid(row = 3, column = 1, padx=20, pady=(10, 0), sticky="nsew")
+    dob_entry.grid(row = 5, column = 1, padx=20, pady=(10, 0), sticky="nsew")
     mrn_entry = ct.CTkEntry(master=add_patient_info, textvariable=mrn)
-    mrn_entry.grid(row = 4, column = 1, padx=20, pady=(10, 0), sticky="nsew")
+    mrn_entry.grid(row = 6, column = 1, padx=20, pady=(10, 0), sticky="nsew")
 
 
     submit = ct.CTkButton(master=add_patient_info, text = "Submit", command= lambda: validate(first_name.get(), last_name.get(), dob.get(), mrn.get(), idx, tree))
-    submit.grid(row = 5, column = 1, padx=20, pady=(10, 0), sticky="w")
+    submit.grid(row = 7, column = 1, padx=20, pady=(10, 0), sticky="w")
 
 def validate(first_name, last_name, dob, mrn, idx, tree):
     if(first_name != "" and last_name != "" and dob != "" and mrn != ""):
@@ -476,9 +492,11 @@ def download_file(root, filename):
         change_to_success()
 
 def change_to_upload():
-    upload.grid(row=0, column=0, sticky="nsew")
+    upload.grid(row=0, column=0, pady=(0, 50), sticky="nsew")
+    label = ct.CTkLabel(master=upload, text="Click the 'Upload File' button to select the original patient's HL7 File", font=(default_font, 20))
+    label.grid(row=0, column=0, padx=20, pady=20)
     button = ct.CTkButton(master=upload, text="Upload File", command=upload_file)
-    button.grid(row=0, column=0, padx=20, pady=100)
+    button.grid(row=1, column=0, padx=20, pady=100)
     choose_patient.grid_forget()
     add_patient_info.grid_forget()
     download.grid_forget()
@@ -486,7 +504,7 @@ def change_to_upload():
     success.grid_forget()
 
 def change_to_choose_patient():
-    choose_patient.grid(row=0, column=0, padx=20, pady=20, sticky="nsew")
+    choose_patient.grid(row=0, column=0, padx=10, pady=(0, 50), sticky="nsew")
     add_patient_info.grid_forget()
     upload.grid_forget()
     download.grid_forget()
@@ -494,7 +512,7 @@ def change_to_choose_patient():
     success.grid_forget()
 
 def change_to_add_patient():
-    add_patient_info.grid(row=0, column=0, padx=20, pady=20, sticky="nsew")
+    add_patient_info.grid(row=0, column=0, pady= (0, 50) , sticky="nsew")
     choose_patient.grid_forget()
     upload.grid_forget()
     download.grid_forget()
@@ -502,7 +520,7 @@ def change_to_add_patient():
     success.grid_forget()
 
 def change_to_loading():
-    loading.grid(row=0, column=0, padx=20, pady=20, sticky="nsew")
+    loading.grid(row=0, column=0, pady=(0, 50), sticky="nsew")
     add_patient_info.grid_forget()
     choose_patient.grid_forget()
     upload.grid_forget()
@@ -510,8 +528,8 @@ def change_to_loading():
     success.grid_forget()
 
 def change_to_success():
-    success.grid(row=0, column=0, padx=20, pady=20, sticky="nsew")
-    label = ct.CTkLabel(master=success, text = "Download Successful")
+    success.grid(row=0, column=0, pady=(0, 50), sticky="nsew")
+    label = ct.CTkLabel(master=success, text = "Download Successful", font=(default_font, 20))
     label.grid(row = 0, column = 0, padx=20, pady=10)
     button = ct.CTkButton(master=success, text="Back", command=back)
     button.grid(row=1, column=0, padx=20, pady=100)
@@ -524,8 +542,8 @@ def back():
     success.grid_forget()
 
 def change_to_invalid():
-    success.grid(row=0, column=0, padx=20, pady=20, sticky="nsew")
-    label = ct.CTkLabel(master=success, text = "Invalid Data")
+    success.grid(row=0, column=0, pady=(0, 50), sticky="nsew")
+    label = ct.CTkLabel(master=success, text = "Invalid Data", font=(default_font, 20))
     label.grid(row = 0, column = 0, padx=20, pady=10)
     button = ct.CTkButton(master=success, text="Back", command=back)
     button.grid(row=1, column=0, padx=20, pady=100)
@@ -544,19 +562,28 @@ def reset():
     change_to_upload()
 
 def change_to_download(tree, filename, name):
-    download.grid(row=0, column=0, padx=20, pady=20, sticky="nsew")
+    download.grid(row=0, column=0, pady=(0, 50), sticky="nsew")
 
-    label = ct.CTkLabel(master=download, text="HL7 File Generated for " + name)
+    label = ct.CTkLabel(master=download, text="HL7 File Generated for " + name, font=(default_font, 30))
     label.grid(row=0, column=0, padx=20, pady=5)
+    instructions1 = ct.CTkLabel(master=download, text="Click the 'Download File' button to download the HL7", font=(default_font, 20))
+    instructions1.grid(row=1, column=0, padx=20, pady=(10, 0), sticky="ew")
+    instructions2 = ct.CTkLabel(master=download, text="file generated for the new patient", font=(default_font, 20))
+    instructions2.grid(row=2, column=0, padx=20, pady=(10, 0), sticky="ew")
 
     button = ct.CTkButton(master=download, text="Download File", command= lambda: download_file(tree, filename))
-    button.grid(row=1, column=0, padx=20, pady=100)
-    
+    button.grid(row=3, column=0, padx=20, pady=50)
+
+    instructions3 = ct.CTkLabel(master=download, text="Click the 'Restart' button to restart the program", font=(default_font, 15))
+    instructions3.grid(row=4, column=0, padx=20, pady=(20, 0), sticky="ew")
     button = ct.CTkButton(master=download, text="Restart", command=reset)
-    button.grid(row=2, column=0, padx=20, pady=10)
+    button.grid(row=5, column=0, padx=20, pady=10)
+    
+    instructions4 = ct.CTkLabel(master=download, text="Click the 'Quit' button to exit", font=(default_font, 15))
+    instructions4.grid(row=6, column=0, padx=20, pady=(10, 0), sticky="ew")
 
     button = ct.CTkButton(master=download, text="Quit", command=app.destroy)
-    button.grid(row = 3, column=0, padx=20, pady=10)
+    button.grid(row = 7, column=0, padx=20, pady=10)
     add_patient_info.grid_forget()
     choose_patient.grid_forget()
     upload.grid_forget()
@@ -571,5 +598,7 @@ loading = Frame(app)
 download = Frame(app)
 success = Frame(app)
 invalid = Frame(app)
+default_font = font.nametofont("TkTextFont")
+default_font.actual()
 change_to_upload()
 app.mainloop()
