@@ -343,9 +343,15 @@ def add_data(idx, tree):
     mrn_entry = ct.CTkEntry(master=add_patient_info, textvariable=mrn)
     mrn_entry.grid(row = 4, column = 1, padx=20, pady=(10, 0), sticky="nsew")
 
-    submit = ct.CTkButton(master=add_patient_info, text = "Submit", command= lambda: reorient_file(first_name.get(), last_name.get(), dob.get(), mrn.get(), idx, tree))
+
+    submit = ct.CTkButton(master=add_patient_info, text = "Submit", command= lambda: validate(first_name.get(), last_name.get(), dob.get(), mrn.get(), idx, tree))
     submit.grid(row = 5, column = 1, padx=20, pady=(10, 0), sticky="w")
 
+def validate(first_name, last_name, dob, mrn, idx, tree):
+    if(first_name != "" and last_name != "" and dob != "" and mrn != ""):
+        reorient_file(first_name, last_name,dob, mrn, idx, tree)
+    else:
+        change_to_invalid()
 
 def reorient_file(first_name,last_name, dob, mrn, idx, tree):
     change_to_loading()
@@ -455,8 +461,9 @@ def reorient_file(first_name,last_name, dob, mrn, idx, tree):
     else:
         filename = str(first_name) + " " + mrn + " HL7 " + today + "-" + current_time + ".xml"
 
+    name = str(last_name) + ", " + str(first_name)
     
-    change_to_download(root, filename)
+    change_to_download(root, filename, name)
 
    
 
@@ -516,22 +523,40 @@ def change_to_success():
 def back():
     success.grid_forget()
 
+def change_to_invalid():
+    success.grid(row=0, column=0, padx=20, pady=20, sticky="nsew")
+    label = ct.CTkLabel(master=success, text = "Invalid Data")
+    label.grid(row = 0, column = 0, padx=20, pady=10)
+    button = ct.CTkButton(master=success, text="Back", command=back)
+    button.grid(row=1, column=0, padx=20, pady=100)
+    loading.grid_forget()
+    choose_patient.grid_forget()
+    upload.grid_forget()
+    download.grid_forget()
+
+def back_to_add():
+    invalid.grid_forget()
+
 def reset():
     globalVars.reset()
     for widgets in choose_patient.winfo_children():
       widgets.destroy()
     change_to_upload()
 
-def change_to_download(tree, filename):
+def change_to_download(tree, filename, name):
     download.grid(row=0, column=0, padx=20, pady=20, sticky="nsew")
+
+    label = ct.CTkLabel(master=download, text="HL7 File Generated for " + name)
+    label.grid(row=0, column=0, padx=20, pady=5)
+
     button = ct.CTkButton(master=download, text="Download File", command= lambda: download_file(tree, filename))
-    button.grid(row=0, column=0, padx=20, pady=100)
+    button.grid(row=1, column=0, padx=20, pady=100)
     
     button = ct.CTkButton(master=download, text="Restart", command=reset)
-    button.grid(row=1, column=0, padx=20, pady=10)
+    button.grid(row=2, column=0, padx=20, pady=10)
 
     button = ct.CTkButton(master=download, text="Quit", command=app.destroy)
-    button.grid(row = 2, column=0, padx=20, pady=10)
+    button.grid(row = 3, column=0, padx=20, pady=10)
     add_patient_info.grid_forget()
     choose_patient.grid_forget()
     upload.grid_forget()
@@ -545,5 +570,6 @@ add_patient_info = Frame(app)
 loading = Frame(app)
 download = Frame(app)
 success = Frame(app)
+invalid = Frame(app)
 change_to_upload()
 app.mainloop()
