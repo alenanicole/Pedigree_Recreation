@@ -668,34 +668,36 @@ def rearrange(tree, patientPerson, newPatientOldID):
                         relationshipHolderNew = x.find('relationshipHolder')
                         motherID = relationshipHolderNew.find('id').get('extension')
                         globalVars.notAvailableIdsToAdd.append(motherID)
-                        if int(motherID) <= 7 or int(motherID) == int(newPatientOldID):
-                            if int(motherID) == 1:
-                                relationshipHolderNew.find('id').set('extension', str(originalPatientID))
-                            if int(motherID) == 2:
-                                relationshipHolderNew.find('id').set('extension', str(OGmotherID))
-                            if int(motherID) == 4:
-                                relationshipHolderNew.find('id').set('extension', str(mgrmthCode))  
-                            if int(motherID) == 6:
-                                relationshipHolderNew.find('id').set('extension', str(pgrmthCode))  
-                            if int(motherID) == int(newPatientOldID):
-                                relationshipHolderNew.find('id').set('extension', "1")
+                        if int(motherID) == 1:
+                            relationshipHolderNew.find('id').set('extension', str(originalPatientID))
+                        if int(motherID) == 2:
+                            relationshipHolderNew.find('id').set('extension', str(OGmotherID))
+                        if int(motherID) == 4:
+                            relationshipHolderNew.find('id').set('extension', str(mgrmthCode))  
+                        if int(motherID) == 6:
+                            relationshipHolderNew.find('id').set('extension', str(pgrmthCode))  
+                        if int(motherID) == int(newPatientOldID):
+                            relationshipHolderNew.find('id').set('extension', "1")
+                        if int(motherID) == int(newPatientMotherID):
+                            relationshipHolderNew.find('id').set('extension', "2")
                     # Check if the "NotAvailable" relative's father is on the maternal side
                     # If their father falls in one of the first 7 ids, update accordingly
                     elif(x.find('code').get('code') == "NFTH"):
                         relationshipHolderNew = x.find('relationshipHolder')
                         fatherID = relationshipHolderNew.find('id').get('extension')
                         globalVars.notAvailableIdsToAdd.append(fatherID)
-                        if int(fatherID) <= 7 or int(fatherID) == int(newPatientOldID):
-                            if int(fatherID) == 1:
-                                relationshipHolderNew.find('id').set('extension', str(originalPatientID))
-                            if int(fatherID) == 3:
-                                relationshipHolderNew.find('id').set('extension', str(OGfatherID))
-                            if int(fatherID) == 5:
-                                relationshipHolderNew.find('id').set('extension', str(mgrfthCode)) 
-                            if int(fatherID) == 7:
-                                relationshipHolderNew.find('id').set('extension', str(pgrfthCode)) 
-                            if int(fatherID) == int(newPatientOldID):
-                                relationshipHolderNew.find('id').set('extension', "1")  
+                        if int(fatherID) == 1:
+                            relationshipHolderNew.find('id').set('extension', str(originalPatientID))
+                        if int(fatherID) == 3:
+                            relationshipHolderNew.find('id').set('extension', str(OGfatherID))
+                        if int(fatherID) == 5:
+                            relationshipHolderNew.find('id').set('extension', str(mgrfthCode)) 
+                        if int(fatherID) == 7:
+                            relationshipHolderNew.find('id').set('extension', str(pgrfthCode)) 
+                        if int(fatherID) == int(newPatientOldID):
+                            relationshipHolderNew.find('id').set('extension', "1")  
+                        if int(fatherID) == int(newPatientFatherID):
+                            relationshipHolderNew.find('id').set('extension', "3")
 
                 globalVars.notAvailableIdsToAdd.append(id)
         else:
