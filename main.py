@@ -329,6 +329,7 @@ def output_family(tree):
         i += 1
 
 def add_data(idx, tree):
+    idx = idx - 2
     change_to_add_patient()
 
     instructions1 = ct.CTkLabel(master=add_patient_info, text="Fill in the required data for the new patient below", font=(default_font, 20))
@@ -351,8 +352,10 @@ def add_data(idx, tree):
     mrn_label =  ct.CTkLabel(master=add_patient_info, text = "Medical Record Number")
     mrn_label.grid(row = 6, column = 0, padx=20, pady=(10, 0), sticky="w")
     first_name_entry = ct.CTkEntry(master=add_patient_info, textvariable=first_name)
+    first_name_entry.insert(0, globalVars.first_names[idx])
     first_name_entry.grid(row = 3, column = 1, padx=20, pady=(10, 0), sticky="nsew")
     last_name_entry = ct.CTkEntry(master=add_patient_info, textvariable=last_name)
+    last_name_entry.insert(0, globalVars.last_names[idx])
     last_name_entry.grid(row = 4, column = 1, padx=20, pady=(10, 0), sticky="nsew")
     dob_entry = ct.CTkEntry(master=add_patient_info, textvariable=dob)
     dob_entry.grid(row = 5, column = 1, padx=20, pady=(10, 0), sticky="nsew")

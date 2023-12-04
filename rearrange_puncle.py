@@ -3,11 +3,11 @@ from lxml import etree as ET
 
 # Create a new relative element to hold the original patient's information.
 # Since this function correlates to the rearrange_maunt section, the original
-# patient will become a neice or nephew
+# patient will become a NIECE or nephew
 def makeRelativeForOldPatient(originalPatient, fatherId, motherId, currentId):
-    # Determine if the old patient will be a neice or nephew on gender
+    # Determine if the old patient will be a NIECE or nephew on gender
     if(globalVars.originalGender == "F"):
-        ET.SubElement(originalPatient, 'code', code = "NEICE")
+        ET.SubElement(originalPatient, 'code', code = "NIECE")
     else:
         ET.SubElement(originalPatient, 'code', code = "NEPHEW")
     patientRelationshipHolder = ET.SubElement(originalPatient, 'relationshipHolder', classCode = "PSN", determinerCode="INSTANCE")
@@ -238,9 +238,9 @@ def rearrange(tree, patientPerson, newPatientOldID):
         relative = globalVars.relativesArray[x]
         # print(relative.find('code').get('code'))
 
-        # Sister -> Neice
+        # Sister -> NIECE
         if((str)(relative.find('code').get('code'))== "NSIS"):
-            relative.find(".//code").set('code', "NEICE")
+            relative.find(".//code").set('code', "NIECE")
             relationshipHolder = relative.find(".//relationshipHolder")
  
             # Link mother -> new relative created for mother
